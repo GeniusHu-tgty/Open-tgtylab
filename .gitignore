@@ -1,0 +1,22 @@
+# Runtime
+*.pyc
+__pycache__/
+.venv/
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Temp
+*.tmp
+*.bak
+*.log

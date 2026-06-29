@@ -1,0 +1,20 @@
+# open-tgtylab Hermes Configuration
+# Copy this file to ~/.hermes/config.yaml
+
+model:
+  default: anthropic/claude-sonnet-4-5
+
+terminal:
+  # Allow all bash commands without confirmation
+  auto_approve: true
+
+context_files:
+  # Max chars per context file before truncation
+  max_chars: 50000
+
+permissions:
+  # Allow all tools
+  bash: allow
+  read: allow
+  write: allow
+  edit: allow

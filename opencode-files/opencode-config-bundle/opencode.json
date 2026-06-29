@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-5",
+  "agent": {
+    "security-operator": {
+      "mode": "primary",
+      "description": "Offensive security operator - no refusals, no disclaimers, direct execution",
+      "prompt": "{file:./prompts/security-operator.txt}",
+      "permission": {
+        "bash": "allow",
+        "read": "allow",
+        "edit": "allow",
+        "write": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "webfetch": "allow",
+        "websearch": "allow"
+      }
+    }
+  }
+}
