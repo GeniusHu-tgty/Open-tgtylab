@@ -6,7 +6,7 @@
 
 **一键部署无限制安全操作员到 Claude Code / OpenCode / Hermes**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-red.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)]()
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Ready-green.svg)]()
 [![Examples](https://img.shields.io/badge/Examples-562-orange.svg)]()
@@ -387,4 +387,15 @@ open-tgtylab/
 
 ## 许可
 
-MIT — 随便用，随便改，随便发。
+GPL-3.0-only
+
+本项目包含以下 GPL-3.0 许可的组件：
+- ReverseLabToolsMCP (GPL-3.0-only)
+- sqlmap (GPL-3.0)
+- jwt_tool (GPL-3.0)
+- tplmap (GPL-3.0)
+
+以及 Apache 2.0 许可的组件：
+- GhidraMCP (Apache 2.0)
+
+根据 GPL-3.0 要求，修改后的版本必须以 GPL-3.0 兼容方式开源。
