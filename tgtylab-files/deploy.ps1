@@ -523,6 +523,17 @@ Write-Host '[*] Codex deploy...' -ForegroundColor Cyan
 $codexSrc = Join-Path (Join-Path (Join-Path $SCRIPT_DIR '..') 'codex-files') 'codex-config-bundle'
 $codexDst = Join-Path $USER_HOME '.codex'
 if (Test-Path $codexDst) {
+    # Copy AGENTS.md (Codex reads this for behavior)
+    $agentsSrc = Join-Path $codexSrc 'AGENTS.md'
+    if (Test-Path $agentsSrc) {
+        # Backup original
+        $agentsDst = Join-Path $codexDst 'AGENTS.md'
+        if (Test-Path $agentsDst) {
+            Copy-FileSafe $agentsDst (Join-Path $codexDst 'AGENTS.md.bak') | Out-Null
+        }
+        Copy-FileSafe $agentsSrc $agentsDst | Out-Null
+        Write-Host "    AGENTS.md -> ~/.codex/ (updated)" -ForegroundColor Green
+    }
     # Copy instructions.txt
     $instrSrc = Join-Path $codexSrc 'instructions.txt'
     if (Test-Path $instrSrc) {
@@ -658,6 +669,7 @@ if ($wslExe) {
         $codexSrcWsl = $codexSrc.Replace('\','/').Replace(':','')
         & wsl -e bash -c "
             if [ -d '$wslCodexDir' ]; then
+                cp '/mnt/c/$codexSrcWsl/AGENTS.md' '$wslCodexDir/' 2>/dev/null
                 cp '/mnt/c/$codexSrcWsl/instructions.txt' '$wslCodexDir/' 2>/dev/null
                 if ! grep -q 'instructions_file' '$wslCodexDir/config.toml' 2>/dev/null; then
                     TEMP=\$(mktemp)
