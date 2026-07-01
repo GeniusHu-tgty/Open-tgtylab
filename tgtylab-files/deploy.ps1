@@ -517,6 +517,35 @@ foreach ($dir in $ALL_DIRS) {
     }
 }
 
+# Codex
+Write-Host ''
+Write-Host '[*] Codex deploy...' -ForegroundColor Cyan
+$codexSrc = Join-Path (Join-Path (Join-Path $SCRIPT_DIR '..') 'codex-files') 'codex-config-bundle'
+$codexDst = Join-Path $USER_HOME '.codex'
+if (Test-Path $codexDst) {
+    # Copy instructions.txt
+    $instrSrc = Join-Path $codexSrc 'instructions.txt'
+    if (Test-Path $instrSrc) {
+        Copy-FileSafe $instrSrc (Join-Path $codexDst 'instructions.txt') | Out-Null
+        Write-Host "    instructions.txt -> ~/.codex/ (updated)" -ForegroundColor Green
+    }
+    # Add instructions_file to config.toml (merge, don't overwrite)
+    $codexConfig = Join-Path $codexDst 'config.toml'
+    if (Test-Path $codexConfig) {
+        try {
+            $content = Get-Content $codexConfig -Raw -ErrorAction Stop
+            if ($content -notmatch 'instructions_file') {
+                $content = $content.TrimEnd() + "`ninstructions_file = `"instructions.txt`"`n"
+                Write-FileUtf8 $codexConfig $content | Out-Null
+                Write-Host "    config.toml: added instructions_file" -ForegroundColor Green
+            } else {
+                Write-Host "    config.toml: already has instructions_file" -ForegroundColor DarkGray
+            }
+        } catch { Write-Host "    config.toml: SKIPPED (error)" -ForegroundColor Yellow }
+    }
+    Write-Host "    OK" -ForegroundColor Green
+} else { Write-Host "    SKIPPED (~/.codex/ not found)" -ForegroundColor DarkGray }
+
 # OpenCode
 Write-Host ''
 Write-Host '[*] OpenCode deploy...' -ForegroundColor Cyan
