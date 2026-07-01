@@ -624,12 +624,15 @@ if ($wslExe) {
         # WSL Claude Code
         $wslClaudeDir = "$wslHome/.claude"
         $winSrc = $BUNDLE_DIR
-        & wsl -e bash -c "
-            mkdir -p '$wslClaudeDir/.claude/hooks' '$wslClaudeDir/.claude/workflows'
-            cp '/mnt/c/$($winSrc.Replace('\','/').Replace(':',''))'/CLAUDE.md '$wslClaudeDir/CLAUDE.md' 2>/dev/null
-            cp '/mnt/c/$($winSrc.Replace('\','/').Replace(':',''))'/system-prompt.md '$wslClaudeDir/system-prompt.md' 2>/dev/null
-            echo 'model_instructions_file = \"system-prompt.md\"' > '$wslClaudeDir/config.toml'
-        " 2>$null
+        $wslClaudeSrc = $winSrc.Replace('\','/').Replace(':','')
+        $wslClaudeScript = @'
+mkdir -p "WCLDIR/.claude/hooks" "WCLDIR/.claude/workflows"
+cp "/mnt/c/WSRC/CLAUDE.md" "WCLDIR/CLAUDE.md" 2>/dev/null
+cp "/mnt/c/WSRC/system-prompt.md" "WCLDIR/system-prompt.md" 2>/dev/null
+printf 'model_instructions_file = "system-prompt.md"\n' > "WCLDIR/config.toml"
+'@
+        $wslClaudeScript = $wslClaudeScript.Replace('WCLDIR', $wslClaudeDir).Replace('WSRC', $wslClaudeSrc)
+        & wsl -e bash -c $wslClaudeScript 2>$null
 
         # WSL hooks + workflows
         $wslScriptDir = $SCRIPT_DIR.Replace('\','/').Replace(':','')
@@ -667,22 +670,24 @@ if ($wslExe) {
         # WSL Codex
         $wslCodexDir = "$wslHome/.codex"
         $codexSrcWsl = $codexSrc.Replace('\','/').Replace(':','')
-        & wsl -e bash -c "
-            if [ -d '$wslCodexDir' ]; then
-                cp '/mnt/c/$codexSrcWsl/gpt5.5-unrestricted.md' '$wslCodexDir/' 2>/dev/null
-                cp '/mnt/c/$codexSrcWsl/AGENTS.md' '$wslCodexDir/' 2>/dev/null
-                cp '/mnt/c/$codexSrcWsl/instructions.txt' '$wslCodexDir/' 2>/dev/null
-                if ! grep -q 'model_instructions_file' '$wslCodexDir/config.toml' 2>/dev/null; then
-                    TEMP=\$(mktemp)
-                    echo 'model_instructions_file = \"./gpt5.5-unrestricted.md\"' > \"\$TEMP\"
-                    cat '$wslCodexDir/config.toml' >> \"\$TEMP\"
-                    mv \"\$TEMP\" '$wslCodexDir/config.toml'
-                fi
-                echo 'OK'
-            else
-                echo 'SKIP'
-            fi
-        " 2>$null | ForEach-Object {
+        $wslCodexScript = @'
+if [ -d "WCLDIR" ]; then
+    cp "/mnt/c/CSRC/gpt5.5-unrestricted.md" "WCLDIR/" 2>/dev/null
+    cp "/mnt/c/CSRC/AGENTS.md" "WCLDIR/" 2>/dev/null
+    cp "/mnt/c/CSRC/instructions.txt" "WCLDIR/" 2>/dev/null
+    if ! grep -q 'model_instructions_file' "WCLDIR/config.toml" 2>/dev/null; then
+        TEMP=$(mktemp)
+        printf 'model_instructions_file = "./gpt5.5-unrestricted.md"\n' > "$TEMP"
+        cat "WCLDIR/config.toml" >> "$TEMP"
+        mv "$TEMP" "WCLDIR/config.toml"
+    fi
+    echo 'OK'
+else
+    echo 'SKIP'
+fi
+'@
+        $wslCodexScript = $wslCodexScript.Replace('WCLDIR', $wslCodexDir).Replace('CSRC', $codexSrcWsl)
+        & wsl -e bash -c $wslCodexScript 2>$null | ForEach-Object {
             if ($_ -match 'OK') { Write-Host "    Codex (WSL): OK" -ForegroundColor Green }
             else { Write-Host "    Codex (WSL): SKIPPED (not found)" -ForegroundColor DarkGray }
         }
