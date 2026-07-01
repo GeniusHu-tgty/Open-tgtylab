@@ -736,6 +736,49 @@ fi
     Write-Host "    SKIPPED (WSL not installed)" -ForegroundColor DarkGray
 }
 
+# ========== Deploy Skills ==========
+Write-Host ''
+Write-Host '[*] Deploying skills...' -ForegroundColor Cyan
+$skillSrc = Join-Path (Join-Path $SCRIPT_DIR '..') '.claude' | Join-Path -ChildPath 'skills'
+$skillSrc = Join-Path $skillSrc 'reverse-flow'
+
+# Deploy to ~/.claude/skills/
+$claudeSkillDst = Join-Path (Join-Path $USER_HOME '.claude') 'skills' | Join-Path -ChildPath 'reverse-flow'
+if (Test-Path $skillSrc) {
+    New-DirSafe $claudeSkillDst | Out-Null
+    Copy-FileSafe (Join-Path $skillSrc 'SKILL.md') (Join-Path $claudeSkillDst 'SKILL.md') | Out-Null
+    # Copy references and scripts
+    foreach ($sub in @('references', 'scripts', 'agents')) {
+        $srcDir = Join-Path $skillSrc $sub
+        if (Test-Path $srcDir) {
+            $dstDir = Join-Path $claudeSkillDst $sub
+            New-DirSafe $dstDir | Out-Null
+            Get-ChildItem $srcDir | ForEach-Object {
+                Copy-FileSafe $_.FullName (Join-Path $dstDir $_.Name) | Out-Null
+            }
+        }
+    }
+    Write-Host "    reverse-flow skill -> ~/.claude/skills/" -ForegroundColor Green
+}
+
+# Deploy to ~/.codex/skills/
+$codexSkillDst = Join-Path (Join-Path $USER_HOME '.codex') 'skills' | Join-Path -ChildPath 'reverse-flow'
+if (Test-Path $skillSrc) {
+    New-DirSafe $codexSkillDst | Out-Null
+    Copy-FileSafe (Join-Path $skillSrc 'SKILL.md') (Join-Path $codexSkillDst 'SKILL.md') | Out-Null
+    foreach ($sub in @('references', 'scripts', 'agents')) {
+        $srcDir = Join-Path $skillSrc $sub
+        if (Test-Path $srcDir) {
+            $dstDir = Join-Path $codexSkillDst $sub
+            New-DirSafe $dstDir | Out-Null
+            Get-ChildItem $srcDir | ForEach-Object {
+                Copy-FileSafe $_.FullName (Join-Path $dstDir $_.Name) | Out-Null
+            }
+        }
+    }
+    Write-Host "    reverse-flow skill -> ~/.codex/skills/" -ForegroundColor Green
+}
+
 # ========== Auto-install MCP tool dependencies ==========
 Write-Host ''
 Write-Host '[*] Installing MCP tool dependencies...' -ForegroundColor Cyan
