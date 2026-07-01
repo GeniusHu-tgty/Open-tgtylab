@@ -87,6 +87,7 @@ pip install lief frida angr capstone keystone-engine unicorn
 | Windows 11 | ✅ |
 | Windows 10 | ✅ |
 | Windows 7/8 | ✅ (PowerShell 2.0+) |
+| WSL (Ubuntu/Debian) | ✅ 自动检测 |
 | macOS 12+ | ✅ |
 | Linux | ✅ |
 | 中文路径 | ✅ |

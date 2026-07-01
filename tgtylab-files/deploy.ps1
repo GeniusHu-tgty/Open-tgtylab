@@ -529,14 +529,15 @@ if (Test-Path $codexDst) {
         Copy-FileSafe $instrSrc (Join-Path $codexDst 'instructions.txt') | Out-Null
         Write-Host "    instructions.txt -> ~/.codex/ (updated)" -ForegroundColor Green
     }
-    # Add instructions_file to config.toml (merge, don't overwrite)
+    # Add instructions_file to config.toml (prepend at top for clean TOML)
     $codexConfig = Join-Path $codexDst 'config.toml'
     if (Test-Path $codexConfig) {
         try {
             $content = Get-Content $codexConfig -Raw -ErrorAction Stop
             if ($content -notmatch 'instructions_file') {
-                $content = $content.TrimEnd() + "`ninstructions_file = `"instructions.txt`"`n"
-                Write-FileUtf8 $codexConfig $content | Out-Null
+                # Prepend at top of file (TOML top-level key)
+                $newContent = "instructions_file = `"instructions.txt`"`n" + $content
+                Write-FileUtf8 $codexConfig $newContent | Out-Null
                 Write-Host "    config.toml: added instructions_file" -ForegroundColor Green
             } else {
                 Write-Host "    config.toml: already has instructions_file" -ForegroundColor DarkGray
@@ -598,6 +599,65 @@ if (Test-Path $hermesSrc) {
     }
     Write-Host "    OK" -ForegroundColor Green
 } else { Write-Host "    SKIPPED (source not found)" -ForegroundColor DarkGray }
+
+# ========== WSL Deploy ==========
+Write-Host ''
+Write-Host '[*] WSL deploy...' -ForegroundColor Cyan
+$wslExe = Get-Command wsl -ErrorAction SilentlyContinue
+if ($wslExe) {
+    $wslHome = & wsl -e bash -c 'echo $HOME' 2>$null
+    if ($wslHome) {
+        $wslHome = $wslHome.Trim()
+        Write-Host "    WSL home: $wslHome" -ForegroundColor DarkGray
+
+        # WSL Claude Code
+        $wslClaudeDir = "$wslHome/.claude"
+        $winSrc = $BUNDLE_DIR
+        & wsl -e bash -c "
+            mkdir -p '$wslClaudeDir/.claude/hooks' '$wslClaudeDir/.claude/workflows'
+            cp '/mnt/c/$($winSrc.Replace('\','/').Replace(':',''))'/CLAUDE.md '$wslClaudeDir/CLAUDE.md' 2>/dev/null
+            cp '/mnt/c/$($winSrc.Replace('\','/').Replace(':',''))'/system-prompt.md '$wslClaudeDir/system-prompt.md' 2>/dev/null
+            echo 'model_instructions_file = \"system-prompt.md\"' > '$wslClaudeDir/config.toml'
+        " 2>$null
+
+        # WSL hooks + workflows
+        $wslScriptDir = $SCRIPT_DIR.Replace('\','/').Replace(':','')
+        & wsl -e bash -c "
+            SRC='/mnt/c/$($wslScriptDir)/..'
+            cp '\$SRC/.claude/hooks/pre-tool-call.sh' '$wslClaudeDir/.claude/hooks/' 2>/dev/null
+            for f in '\$SRC/.claude/workflows/'*.js; do cp \"\$f\" '$wslClaudeDir/.claude/workflows/' 2>/dev/null; done
+            cp '\$SRC/settings.local.json' '$wslClaudeDir/.claude/' 2>/dev/null
+        " 2>$null
+
+        $wslClaudeOk = & wsl -e bash -c "test -f '$wslClaudeDir/CLAUDE.md' && echo OK || echo FAIL" 2>$null
+        if ($wslClaudeOk -match 'OK') {
+            Write-Host "    Claude Code (WSL): OK" -ForegroundColor Green
+        } else {
+            Write-Host "    Claude Code (WSL): SKIPPED" -ForegroundColor DarkGray
+        }
+
+        # WSL Hermes
+        $wslHermesDir = "$wslHome/.hermes"
+        $hermesSrcWin = Join-Path (Join-Path (Join-Path $SCRIPT_DIR '..') 'hermes-files') 'hermes-config-bundle'
+        $hermesSrcWsl = $hermesSrcWin.Replace('\','/').Replace(':','')
+        & wsl -e bash -c "
+            if [ -d '$wslHermesDir' ]; then
+                cp '/mnt/c/$hermesSrcWsl/SOUL.md' '$wslHermesDir/SOUL.md' 2>/dev/null
+                cp '/mnt/c/$hermesSrcWsl/config.yaml' '$wslHermesDir/config.yaml' 2>/dev/null
+                echo 'OK'
+            else
+                echo 'SKIP'
+            fi
+        " 2>$null | ForEach-Object {
+            if ($_ -match 'OK') { Write-Host "    Hermes (WSL): OK" -ForegroundColor Green }
+            else { Write-Host "    Hermes (WSL): SKIPPED (not found)" -ForegroundColor DarkGray }
+        }
+    } else {
+        Write-Host "    SKIPPED (WSL not available)" -ForegroundColor DarkGray
+    }
+} else {
+    Write-Host "    SKIPPED (WSL not installed)" -ForegroundColor DarkGray
+}
 
 # Summary
 Write-Host ''
