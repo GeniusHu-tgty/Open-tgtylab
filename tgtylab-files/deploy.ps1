@@ -736,6 +736,53 @@ fi
     Write-Host "    SKIPPED (WSL not installed)" -ForegroundColor DarkGray
 }
 
+# ========== Auto-install MCP tool dependencies ==========
+Write-Host ''
+Write-Host '[*] Installing MCP tool dependencies...' -ForegroundColor Cyan
+
+# Find uv
+$uvExe = Get-Command uv -ErrorAction SilentlyContinue
+if (-not $uvExe) {
+    # Try pip install uv
+    $pyExe = Get-Command python -ErrorAction SilentlyContinue
+    if ($pyExe) {
+        Write-Host "    Installing uv..." -ForegroundColor Gray
+        & python -m pip install --quiet uv 2>$null
+        $uvExe = Get-Command uv -ErrorAction SilentlyContinue
+    }
+}
+
+$mcpDir = Join-Path (Join-Path (Join-Path (Join-Path $SCRIPT_DIR '..') 'tools') 'skills' ) 'mcp'
+$mcpDir = Join-Path $mcpDir 'ReverseLabToolsMCP'
+if ($uvExe -and (Test-Path $mcpDir)) {
+    Write-Host "    Running uv sync in ReverseLabToolsMCP..." -ForegroundColor Gray
+    Push-Location $mcpDir
+    & uv sync 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "    MCP server dependencies: OK" -ForegroundColor Green
+    } else {
+        Write-Host "    MCP server dependencies: FAILED (run manually: cd tools/skills/mcp/ReverseLabToolsMCP && uv sync)" -ForegroundColor Yellow
+    }
+    Pop-Location
+} else {
+    if (-not $uvExe) { Write-Host "    SKIPPED: uv not found (install: pip install uv)" -ForegroundColor Yellow }
+    if (-not (Test-Path $mcpDir)) { Write-Host "    SKIPPED: ReverseLabToolsMCP not found" -ForegroundColor Yellow }
+}
+
+# Install Python RE libraries
+$pyExe = Get-Command python -ErrorAction SilentlyContinue
+if ($pyExe) {
+    Write-Host "    Installing Python RE libraries..." -ForegroundColor Gray
+    & python -m pip install --quiet lief frida angr capstone keystone-engine unicorn 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "    Python RE libraries: OK" -ForegroundColor Green
+    } else {
+        Write-Host "    Python RE libraries: FAILED (run manually: pip install lief frida angr capstone keystone-engine unicorn)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "    SKIPPED: python not found" -ForegroundColor Yellow
+}
+
 # Summary
 Write-Host ''
 Write-Host '============================================' -ForegroundColor Cyan
@@ -746,10 +793,7 @@ if ($result.Fail -eq 0) {
     if (!$IS_ADMIN) { Write-Host '  Try running as administrator if issues persist' -ForegroundColor DarkGray }
 }
 Write-Host ''
-Write-Host '  Next steps:' -ForegroundColor Yellow
-Write-Host '  1. cd tools/skills/mcp/ReverseLabToolsMCP && uv sync' -ForegroundColor Gray
-Write-Host '  2. pip install lief frida angr capstone keystone-engine unicorn' -ForegroundColor Gray
-Write-Host '  3. Restart Claude Code' -ForegroundColor Gray
+Write-Host '  Restart Claude Code to apply changes.' -ForegroundColor Cyan
 Write-Host '============================================' -ForegroundColor Cyan
 Write-Host ''
 Read-Host 'Press Enter to exit'

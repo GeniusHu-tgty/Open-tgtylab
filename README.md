@@ -46,6 +46,12 @@ Web攻击         云/容器/K8s      社会工程学      恶意软件分析
 
 双击 `启动.bat` 一键部署。
 
+脚本自动完成：
+- ✅ 部署越狱配置到所有 Claude/Codex/Hermes/OpenCode 目录
+- ✅ 安装 MCP 工具依赖（uv sync）
+- ✅ 安装 Python RE 库（lief/frida/angr/capstone/keystone/unicorn）
+- ✅ WSL 自动检测和部署
+
 ### macOS
 
 ```bash
