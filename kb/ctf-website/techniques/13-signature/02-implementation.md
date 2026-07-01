@@ -1423,7 +1423,7 @@ def null_byte_truncation():
     // → 实际使用的 key 更短 → 可枚举
 
     // 场景: 文件路径截断
-    // PHP: file_get_contents("/etc/passwd\\x00.jpg") → /etc/passwd (PHP < 5.3)
+    // PHP: file_get_contents("<sensitive-file>\\x00.jpg") → <sensitive-file> (PHP < 5.3)
     // 如果签名参数包含路径 → 路径截断 → 读任意文件
 
     // ===== 防御 =====

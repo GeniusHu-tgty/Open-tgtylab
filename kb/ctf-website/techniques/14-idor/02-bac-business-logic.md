@@ -449,7 +449,7 @@ def exploit_actuator(base_url):
 | CVE-2026-32270 | Craft Commerce 4.x | 匿名支付时邮箱验证失败，JSON 错误响应仍序列化完整订单对象（含 PII），`authorizeAccess` 在异常路径中未调用 | 提交无效邮箱到 checkout → 获取完整订单数据 |
 | CVE-2025-27713 | Jenkins CLI | `hudson.remoting.Callable` 反序列化未鉴权，任意用户可执行管理操作 | 构造恶意 serialized 对象 → 发送到 TCP 端口 |
 | CVE-2025-29926 | Spring Authorization Server | 不同 PKCE 挑战方法间鉴权不一致，`S256` 绕过某些端点 | 切换 `code_challenge_method` 值 |
-| CVE-2024-23897 | Jenkins (CVSS 9.8) | `args4j` CLI 参数展开，`@` 字符可读取任意文件 | `java -jar jenkins-cli.jar who-am-i @/etc/passwd` |
+| CVE-2024-23897 | Jenkins (CVSS 9.8) | `args4j` CLI 参数展开，`@` 字符可读取任意文件 | `java -jar jenkins-cli.jar who-am-i @<sensitive-file>` |
 
 ## 攻击链
 

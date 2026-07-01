@@ -196,7 +196,7 @@ graph TD
     BINWALK -->|squashfs/jffs2| FS_EXTRACT
     BINWALK -->|u-boot header| BOOTLOADER
     BINWALK -->|mtd partition| FLASH_LAYOUT
-    FS_EXTRACT -->|/etc/shadow| KNOWN_ALGO
+    FS_EXTRACT -->|<shadow-file>| KNOWN_ALGO
     FS_EXTRACT -->|/usr/sbin/*| BINARY
     DEVICE_TREE -->|dtb dump| FLASH_LAYOUT
 

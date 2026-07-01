@@ -43,9 +43,9 @@ http://allowed.example@127.0.0.1/
 
 ```text
 ../
-../../../../etc/passwd
+../../../..<sensitive-file>
 ..%2f..%2f..%2fetc%2fpasswd
-....//....//etc/passwd
+....//..../<sensitive-file>
 ```
 
 ## JWT

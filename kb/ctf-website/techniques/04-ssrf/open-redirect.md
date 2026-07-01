@@ -82,7 +82,7 @@ BYPASSES = [
 # redirect=http://169.254.169.254/latest/meta-data/
 # → SSRF 读云 metadata
 
-# redirect=file:///etc/passwd
+# redirect=file://<sensitive-file>
 # → 文件读取 (Java/某些语言)
 ```
 

