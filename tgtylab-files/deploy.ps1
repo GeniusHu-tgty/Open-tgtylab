@@ -288,20 +288,25 @@ function Deploy-Config($dst, $src, $scriptRoot) {
             # Merge MCP server for Claude Desktop
             $mcpProjectDir = Join-Path (Join-Path (Join-Path $SCRIPT_DIR '..') 'tools') 'skills'
             $mcpProjectDir = Join-Path (Join-Path $mcpProjectDir 'mcp') 'ReverseLabToolsMCP'
+            # Normalize path (resolve ..)
             $mcpProjectDir = [System.IO.Path]::GetFullPath($mcpProjectDir)
             $mcpPy = Join-Path $mcpProjectDir 'reverse_lab_tools_mcp.py'
-            if (-not $existing.mcpServers) {
-                $existing | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([ordered]@{}) -Force
-                $changed = $true
-            }
-            if (-not $existing.mcpServers.reverse_lab_tools) {
-                $existing.mcpServers | Add-Member -NotePropertyName "reverse_lab_tools" -NotePropertyValue ([ordered]@{
-                    command = "uv"
-                    args = @("run", "--project", $mcpProjectDir, "python", $mcpPy)
-                    env = [ordered]@{}
-                }) -Force
-                $changed = $true
-                Write-Host "    MCP server reverse_lab_tools added" -ForegroundColor Green
+            if (Test-Path $mcpPy) {
+                if (-not $existing.mcpServers) {
+                    $existing | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([ordered]@{}) -Force
+                    $changed = $true
+                }
+                if (-not $existing.mcpServers.reverse_lab_tools) {
+                    $existing.mcpServers | Add-Member -NotePropertyName "reverse_lab_tools" -NotePropertyValue ([ordered]@{
+                        command = "uv"
+                        args = @("run", "--project", $mcpProjectDir, "python", $mcpPy)
+                        env = [ordered]@{}
+                    }) -Force
+                    $changed = $true
+                    Write-Host "    MCP server reverse_lab_tools added" -ForegroundColor Green
+                }
+            } else {
+                Write-Host "    MCP server SKIPPED (ReverseLabToolsMCP not found)" -ForegroundColor DarkGray
             }
             if ($changed) {
                 $existing | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Encoding UTF8
