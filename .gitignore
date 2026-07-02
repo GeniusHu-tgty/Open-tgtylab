@@ -36,3 +36,7 @@ cases/
 notes/
 reports/
 .agents/
+
+# GUI installer (not yet published)
+installer.py
+installer.bat
