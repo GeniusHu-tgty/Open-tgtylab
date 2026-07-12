@@ -383,3 +383,14 @@ Python 脚本应具备：
 
 ## 13. Final Conclusion
 ```
+
+## Hunter MCP 协同（强制）
+
+- Hunter MCP 只能注册为 `hunter_tools`；禁止出现旧名称 `hunter`。
+- Web/API 任务启动时，在 `kb_router -> kb_read_file` 后调用 `hunter_workspace_health`，有 case 时继续调用 `hunter_case_open` / `hunter_case_next_steps`。
+- 项目 KB 使用 `hunter_project_kb_search` / `hunter_project_kb_read`；Hunter 自带 payload/技术库继续使用 `hunter_kb_*`，两者不可互相替代。
+- HTTP 执行优先级保持 `Burp send_http2_request > http_probe`；`hunter_burp_*` 用于生成 Burp proof action 和证据计划。
+- 实质结果使用 `hunter_evidence_save` 落到 `exports/evidence/<case>/`；笔记和报告使用 `hunter_note_write`、`hunter_report_publish`。
+- 完成或阶段转换后使用 `hunter_case_update` 原子更新 `cases/<slug>/state.json`。
+- `hunter_tools` 负责 Web/API 安全能力；`reverse_lab_tools` 负责 PE/APK/Frida/Ghidra 等逆向能力，不重复实现。
+- 配置和运行状态可用 `python scripts/misc/verify_hunter_tools_integration.py` 验证。

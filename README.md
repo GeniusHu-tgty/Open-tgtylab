@@ -170,3 +170,13 @@ GPL-3.0-only. See [LICENSE](LICENSE) for details.
 This project is for educational and authorized security research purposes only. Users must ensure they operate within legally authorized scope. Users are solely responsible for any consequences arising from the use of this project.
 
 See [DISCLAIMER.md](DISCLAIMER.md) for the full disclaimer.
+
+## Hunter MCP Integration
+
+OpenTgtyLab supports the independent [Hunter](https://github.com/GeniusHu-tgty/Hunter) repository through one complete MCP server named `hunter_tools`. It shares case state, project KB search, evidence, notes, and reports without merging Hunter into `reverse_lab_tools`.
+
+See `docs/hunter-tools-integration.md` and run:
+
+```bash
+python scripts/misc/verify_hunter_tools_integration.py
+```

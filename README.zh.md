@@ -187,3 +187,13 @@ GPL-3.0-only. 详见 [LICENSE](LICENSE)。
 本项目仅供学习交流和授权安全研究使用。使用者应确保在合法授权范围内使用本项目，使用本项目造成的任何后果由使用者自行承担。
 
 详见 [DISCLAIMER.md](DISCLAIMER.md)。
+
+## Hunter MCP 协同
+
+OpenTgtyLab 通过唯一完整 MCP 名称 `hunter_tools` 接入独立的 [Hunter](https://github.com/GeniusHu-tgty/Hunter) 仓库，共享 case state、项目知识库、evidence、notes 与 reports，同时保持和 `reverse_lab_tools` 的职责边界。
+
+详见 `docs/hunter-tools-integration.md`，验证命令：
+
+```bash
+python scripts/misc/verify_hunter_tools_integration.py
+```

@@ -1,9 +1,16 @@
-{
+﻿{
   "mcpServers": {
     "reverse_lab_tools": {
       "command": "uv",
       "args": ["run", "--project", "tools/skills/mcp/ReverseLabToolsMCP", "python", "tools/skills/mcp/ReverseLabToolsMCP/reverse_lab_tools_mcp.py"],
       "env": {}
+    },
+    "hunter_tools": {
+      "command": "python",
+      "args": ["/absolute/path/to/.agents/skills/hunter/mcp_server.py"],
+      "env": {
+        "OPEN_TGTYLAB_ROOT": "/absolute/path/to/Open-tgtylab"
+      }
     }
   }
 }
