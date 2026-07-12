@@ -24,7 +24,7 @@ cases/<slug>/workflow.json
 cases/<slug>/workflow.events.jsonl
 ```
 
-`workflow.json` follows `schemas/workflow-state-v2.schema.json`. The JSONL file is append-only and records workflow creation, transitions, decisions, hypotheses, evidence, findings and dead ends.
+`workflow.json` follows `schemas/workflow-state-v2.schema.json`. The JSONL file is append-only, revisioned and hash-chained. Writers use optimistic `expected_revision` checks, fsync event appends and atomic materialized-state replacement. It records workflow creation, transitions, decisions, hypotheses, evidence, findings and dead ends.
 
 Canonical phases:
 
@@ -78,4 +78,4 @@ Large raw data remains on disk and is retrieved only on demand. Confirmed findin
 - `guided`: automatically perform bounded low-cost actions; ask only for expensive or ambiguous branches.
 - `autopilot`: follow gates, budget, dead-end memory and proof-aware early stop without routine pauses.
 
-CTF automation should define explicit success conditions such as a flag, derived input, reproducible request, patch or runtime proof.
+CTF automation must define explicit success conditions such as a flag, derived input, reproducible request, patch or runtime proof. A confirmed finding stops the workflow only when its `satisfies` list covers all success conditions. Checkpoint resume validates the workflow and replays the event tail instead of returning a stale snapshot.

@@ -10,7 +10,10 @@
     "type",
     "timestamp",
     "actor",
-    "payload"
+    "payload",
+    "revision",
+    "previous_event_hash",
+    "event_hash"
   ],
   "properties": {
     "event_id": {
@@ -33,6 +36,17 @@
     },
     "schema_version": {
       "const": "1.0"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_event_hash": {
+      "type": "string"
+    },
+    "event_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
     }
   }
 }
