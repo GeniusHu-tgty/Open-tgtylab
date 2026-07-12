@@ -4,6 +4,7 @@
 
 - Hunter feature commit: `d26c2c6`
 - Hunter follow-up fix: `0ce6df4`
+- Hunter final hardening: `bddc462`
 - Branch: `main`
 - MCP server: `hunter_tools`
 - Registered tools: `94`
@@ -34,6 +35,12 @@ existing Stealth session, while `session_id` addresses the new AttackSession.
 - Sensitive state is Fernet-encrypted on disk and redacted in MCP responses.
 - Arbitrary cookies do not count as authentication.
 - Planning statuses pause the state machine rather than entering success paths.
+- Mutating requests persist an in-flight marker and require manual recovery
+  instead of being replayed after an uncertain crash.
+- MCP results contain hashed response summaries rather than raw response bodies,
+  query tokens, redirect tokens, or error text.
+- Captcha image requests are origin-scoped, do not follow redirects, and retain
+  only non-credential browser headers across approved origins.
 - Caller-supplied approval data cannot create a trusted `ready` state. A host
   must provide an independent approval verifier backed by its operator and
   evidence registry.
@@ -44,18 +51,10 @@ existing Stealth session, while `session_id` addresses the new AttackSession.
 ## Verification
 
 ```text
-Hunter full suite: 261 passed in 4.89s
-JS analysis focused suite: 41 passed in 1.14s
+Hunter full suite: 269 passed
+Security-focused suite: 95 passed
 FastMCP registry: 94
 Contract: ok
 Missing tools: []
-Final focused review: Go
-```
-
-Runtime evidence:
-
-```text
-D:\Open-tgtylab\cases\hunter-skill\state.json
-D:\Open-tgtylab\exports\notes\hunter-skill\attack-session-orchestration-2026-07-12.md
-D:\Open-tgtylab\exports\reports\hunter-skill\attack-session-orchestration-2026-07-12.md
+Final focused review: passed
 ```

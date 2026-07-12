@@ -175,6 +175,12 @@ See [DISCLAIMER.md](DISCLAIMER.md) for the full disclaimer.
 
 OpenTgtyLab supports the independent [Hunter](https://github.com/GeniusHu-tgty/Hunter) repository through one complete MCP server named `hunter_tools`. It shares case state, project KB search, evidence, notes, and reports without merging Hunter into `reverse_lab_tools`.
 
+The current integration exposes 94 Hunter tools, including:
+
+- JavaScript bundle unpacking, conservative deobfuscation, API/route extraction, signature reconstruction, JSHook handoff plans, and bounded replay generation.
+- Encrypted persistent attack sessions, checkpoint-safe chain recovery, authorization-scoped requests, and evidence-gated post-exploitation planning.
+- Stateful adaptive HTTP controls for fingerprints, WAF/rate-limit/captcha handling, proxy pools, and audit timelines.
+
 See `docs/hunter-tools-integration.md` and run:
 
 ```bash
