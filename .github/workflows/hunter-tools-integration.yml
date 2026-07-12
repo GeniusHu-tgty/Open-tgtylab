@@ -1,4 +1,4 @@
-﻿name: Hunter tools integration
+name: Hunter tools integration
 
 on:
   push:
@@ -18,6 +18,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Unit tests
-        run: python -m pytest tests/test_hunter_tools_manager.py -q
+        run: python -m pytest -q
       - name: Static configuration checks
         run: python scripts/misc/verify_hunter_tools_integration.py --config-only

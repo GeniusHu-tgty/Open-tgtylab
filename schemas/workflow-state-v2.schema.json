@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-tgtylab.local/schemas/workflow-state-v2.schema.json",
+  "title": "OpenTgtyLab Workflow State v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "workflow_id",
+    "slug",
+    "case",
+    "objective",
+    "scope",
+    "policy",
+    "phase",
+    "lane",
+    "hypotheses",
+    "evidence",
+    "findings",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "workflow_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case": {
+      "type": "object",
+      "required": [
+        "slug"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "objective": {
+      "type": "object",
+      "required": [
+        "text",
+        "success_conditions",
+        "proof_types"
+      ]
+    },
+    "scope": {
+      "type": "object"
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "interactive",
+            "guided",
+            "autopilot"
+          ]
+        }
+      }
+    },
+    "phase": {
+      "enum": [
+        "intake",
+        "triage",
+        "map",
+        "hypothesis",
+        "deep-analysis",
+        "validation",
+        "evidence",
+        "report",
+        "final"
+      ]
+    },
+    "lane": {
+      "enum": [
+        "web",
+        "api",
+        "source",
+        "javascript",
+        "pe",
+        "apk",
+        "firmware",
+        "script",
+        "document",
+        "protocol",
+        "capture",
+        "pwn",
+        "crypto",
+        "mixed"
+      ]
+    },
+    "lane_history": {
+      "type": "array"
+    },
+    "assets": {
+      "type": "array"
+    },
+    "artifacts": {
+      "type": "array"
+    },
+    "signals": {
+      "type": "array"
+    },
+    "hypotheses": {
+      "type": "array"
+    },
+    "decisions": {
+      "type": "array"
+    },
+    "tool_runs": {
+      "type": "array"
+    },
+    "evidence": {
+      "type": "array"
+    },
+    "findings": {
+      "type": "array"
+    },
+    "dead_ends": {
+      "type": "array"
+    },
+    "blockers": {
+      "type": "array"
+    },
+    "budgets": {
+      "type": "object"
+    },
+    "checkpoints": {
+      "type": "array"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "next_steps": {
+      "type": "array"
+    },
+    "slug": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,4 +1,4 @@
-﻿# Hunter `hunter_tools` + OpenTgtyLab Integration
+# Hunter `hunter_tools` + OpenTgtyLab Integration
 
 OpenTgtyLab keeps web-security automation in the independent `Hunter` repository and integrates it through one MCP server named **`hunter_tools`**. Do not register the legacy `hunter` name.
 
@@ -98,3 +98,7 @@ python scripts/misc/evidence_manifest.py \
 ```
 
 Artifacts must remain inside the case evidence directory. Entries include stable evidence id, relative path, SHA-256, byte size, producing tool, finding linkage and UTC timestamp. Re-registering the same path/hash is idempotent.
+
+## Unified CTF / reverse / pentest workflow
+
+See `docs/hunter-unified-workflow.md` for Workflow State v2, event sourcing, lane/phase contracts, multi-client checkpoints, backend responsibilities and migration commands.
