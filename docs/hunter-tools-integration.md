@@ -69,3 +69,16 @@ python scripts/misc/hunter_tools_manager.py install \
 ```
 
 The manager removes the legacy `hunter` registration, writes only `hunter_tools`, injects the resolved `OPEN_TGTYLAB_ROOT`, and is idempotent. A changed global Codex configuration reports `restart_required=true`.
+
+## Codex security-research checkpoints
+
+Long security tasks can be resumed without replaying the entire Codex JSONL session:
+
+```bash
+python scripts/misc/codex_security_checkpoint.py --latest \
+  --output exports/checkpoints/current.checkpoint.json
+```
+
+The adapter reads Codex session metadata, token counters, tool calls, bounded outputs, findings, and next steps. It writes a compact checkpoint with source SHA-256 and a resume hint. It never edits the original session. Use `--dry-run` to preview metrics and `--no-backup` to disable output backup rotation.
+
+This follows the useful adapter/backup/diff principles observed in `ryfineZ/codex-session-patcher`, while keeping OpenTgtyLab focused on evidence-grounded research continuity rather than rewriting model responses.
