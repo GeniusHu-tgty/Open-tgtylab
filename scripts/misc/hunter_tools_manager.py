@@ -10,10 +10,26 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 HUNTER_REPO = "https://github.com/GeniusHu-tgty/Hunter.git"
 DEFAULT_HUNTER_DIR = Path.home() / ".agents" / "skills" / "hunter"
+
+
+def result_failed(result: Mapping[str, Any]) -> bool:
+    status = result.get("status")
+    if status == "error":
+        return True
+    if isinstance(status, Mapping) and status.get("entrypoint_exists") is False:
+        return True
+    verify = result.get("verify")
+    if isinstance(verify, Mapping) and verify.get("status") == "error":
+        return True
+    for key in ("project", "global", "project_config", "global_config"):
+        nested = result.get(key)
+        if isinstance(nested, Mapping) and nested.get("status") == "error":
+            return True
+    return False
 
 
 def remove_toml_server_block(text: str, name: str) -> str:
@@ -119,6 +135,6 @@ def main() -> int:
     elif args.action=="configure": result={"project":manager.configure_project(),"global":manager.configure_global_codex() if args.global_codex else None}
     elif args.action=="doctor": result={"status":manager.status(),"verify":manager.verify()}
     else: result=manager.status()
-    print(json.dumps(result,ensure_ascii=False,indent=2)); return 0 if result.get("status")!="error" else 1
+    print(json.dumps(result,ensure_ascii=False,indent=2)); return 1 if result_failed(result) else 0
 
 if __name__=="__main__": raise SystemExit(main())

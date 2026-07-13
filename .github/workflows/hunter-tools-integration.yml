@@ -17,7 +17,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install verification dependencies
+        run: python -m pip install pytest "mcp[cli]" PyYAML cryptography
+      - name: Checkout Hunter integration dependency
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.agents/skills"
+          git clone --depth 1 https://github.com/GeniusHu-tgty/Hunter.git "$HOME/.agents/skills/hunter"
       - name: Unit tests
         run: python -m pytest -q
       - name: Static configuration checks
         run: python scripts/misc/verify_hunter_tools_integration.py --config-only
+      - name: Full Hunter integration verification
+        run: python scripts/misc/verify_hunter_tools_integration.py

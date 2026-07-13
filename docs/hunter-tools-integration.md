@@ -40,7 +40,11 @@ Run:
 python scripts/misc/verify_hunter_tools_integration.py
 ```
 
-The check fails if `hunter` is registered, if `hunter_tools` is absent, if the entrypoint is missing, or if workspace health cannot be obtained.
+The check validates both project registrations, expands `${HOME}` and
+`${workspaceFolder}`, and fails on any legacy `hunter` server, entrypoint or
+workspace mismatch, missing contract field, missing required tool, FastMCP
+tool-count mismatch, server-name mismatch, or workspace-health mismatch. The
+current contract requires all 111 registered Hunter tools.
 
 ## Integration v2 lifecycle
 

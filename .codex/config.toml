@@ -5,8 +5,8 @@ startup_timeout_sec = 30
 
 [mcp_servers.hunter_tools]
 command = "python"
-args = ["C:/Users/Administrator/.agents/skills/hunter/mcp_server.py"]
+args = ["${HOME}/.agents/skills/hunter/mcp_server.py"]
 startup_timeout_sec = 30
 
 [mcp_servers.hunter_tools.env]
-OPEN_TGTYLAB_ROOT = "D:/Open-tgtylab"
+OPEN_TGTYLAB_ROOT = "${workspaceFolder}"
